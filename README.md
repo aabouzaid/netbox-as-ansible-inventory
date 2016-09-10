@@ -1,0 +1,1 @@
+# netbox-as-ansible-inventory
