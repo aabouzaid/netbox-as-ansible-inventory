@@ -21,7 +21,7 @@
     "tenant": null,
     "platform": null,
     "serial": "",
-    "asset_tag": null,
+    "asset_tag": "x1",
     "rack": {
       "id": 1,
       "name": "xrack",
@@ -36,7 +36,12 @@
     "primary_ip4": null,
     "primary_ip6": null,
     "comments": "",
-    "custom_fields": {}
+    "custom_fields": {
+      "Env": {
+        "id": 1,
+        "value": "Prod"
+      }
+    }
   },
   {
     "id": 1,
@@ -58,7 +63,11 @@
       "slug": "server"
     },
     "tenant": null,
-    "platform": null,
+    "platform": {
+      "id": 7,
+      "name": "ubuntu",
+      "slug": "ubuntu"
+    },
     "serial": "",
     "asset_tag": null,
     "rack": {
@@ -83,6 +92,8 @@
     },
     "primary_ip6": null,
     "comments": "",
-    "custom_fields": {}
+    "custom_fields": {
+      "Env": null
+    }
   }
 ]

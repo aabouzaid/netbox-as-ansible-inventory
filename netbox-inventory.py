@@ -4,7 +4,9 @@ import os
 import re
 import json
 import yaml
+import urllib
 import argparse
+
 
 # Open Yaml file.
 def openYamlFile(yamlFile):
@@ -51,9 +53,9 @@ def addToInventory(inventoryDict, groupList, jsonData):
 
         #
         for group in groupList:
-            if host.has_key(group) and isinstance(host.get(group), dict):
+            if isinstance(host.get(group), dict) and host.has_key(group):
                 groupName = host[group].get('name')
-            elif host.has_key(group) and isinstance(host.get(group), str):
+            elif isinstance(host.get(group), str) and host.has_key(group):
                 groupName = host.get(group)
 
             #
@@ -67,7 +69,24 @@ def addToInventory(inventoryDict, groupList, jsonData):
             inventoryDict['_meta']['hostvars'].update({serverName: {"ansible_ssh_host": serverIP}})
 
     return inventoryDict
-    
+
+#
+def getApiJson(source, configFile):
+    defaults = configFile['defaults']
+
+    if source == 'file':
+        dataSource = defaults.get('sample')
+        with open(dataSource, 'r') as jsonOutput:
+            jsonData = jsonOutput.read()
+    elif source == 'url':
+        dataSource = defaults.get('api_url')
+        jsonOutput = urllib.urlopen(dataSource)
+        jsonData = jsonOutput.read()
+
+    apiJsonOutput = json.loads(jsonData)
+
+    return apiJsonOutput
+
 #
 if __name__ == "__main__":
 
@@ -75,17 +94,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
     parser.add_argument("--list", "--ansible", help="Print output as Ansible dynamic inventory syntax.", action="store_true")
+    parser.add_argument("-t", "--test-sample", help="Test sample of API output instead connect to the real API.", action="store_true")
     args = parser.parse_args()
 
     #
     configFile = openYamlFile(args.config_file)
 
     #
-    if configFile['defaults'].get('sample'):
-      sampleFile = configFile['defaults'].get('sample')
-      with open(sampleFile, 'r') as json_output:
-          json_data = json_output.read()
-          apiJsonOutput = json.loads(json_data)
+    if args.test_sample:
+        dataSource = 'file'
+    else:
+        dataSource = 'url'
+    apiJsonOutput = getApiJson(dataSource, configFile)
 
     #
     groupList = configFile['groupBy']

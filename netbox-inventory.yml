@@ -1,6 +1,6 @@
 defaults:
     sample: 'api_sample.json'
-    netbox_url: 'localhost'
+    api_url: 'http://localhost/api/dcim/devices/'
 
 groupBy:
     - device_role
