@@ -1,0 +1,8 @@
+defaults:
+    sample: 'api_sample.json'
+    netbox_url: 'localhost'
+
+groupBy:
+    - device_role
+    - rack
+    - platform

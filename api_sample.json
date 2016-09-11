@@ -1,0 +1,88 @@
+[
+  {
+    "id": 2,
+    "name": "xserver2",
+    "display_name": "xserver2",
+    "device_type": {
+      "id": 1,
+      "manufacturer": {
+        "id": 8,
+        "name": "Super Micro",
+        "slug": "super-micro"
+      },
+      "model": "all",
+      "slug": "all"
+    },
+    "device_role": {
+      "id": 8,
+      "name": "Server",
+      "slug": "server"
+    },
+    "tenant": null,
+    "platform": null,
+    "serial": "",
+    "asset_tag": null,
+    "rack": {
+      "id": 1,
+      "name": "xrack",
+      "facility_id": null,
+      "display_name": "xrack"
+    },
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": null,
+    "primary_ip4": null,
+    "primary_ip6": null,
+    "comments": "",
+    "custom_fields": {}
+  },
+  {
+    "id": 1,
+    "name": "xserver",
+    "display_name": "xserver",
+    "device_type": {
+      "id": 1,
+      "manufacturer": {
+        "id": 8,
+        "name": "Super Micro",
+        "slug": "super-micro"
+      },
+      "model": "all",
+      "slug": "all"
+    },
+    "device_role": {
+      "id": 8,
+      "name": "Server",
+      "slug": "server"
+    },
+    "tenant": null,
+    "platform": null,
+    "serial": "",
+    "asset_tag": null,
+    "rack": {
+      "id": 1,
+      "name": "xrack",
+      "facility_id": null,
+      "display_name": "xrack"
+    },
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.1/32"
+    },
+    "primary_ip4": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.1/32"
+    },
+    "primary_ip6": null,
+    "comments": "",
+    "custom_fields": {}
+  }
+]
