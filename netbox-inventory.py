@@ -46,31 +46,6 @@ def initInventory():
     return mainDict
 
 #
-def addToInventory(inventoryDict, groupList, jsonData):
-    for host in jsonData:
-        serverName = getFromDict(host,['name'])
-        serverIP = getFromDict(host, ['primary_ip','address'])
-
-        #
-        for group in groupList:
-            if isinstance(host.get(group), dict) and host.has_key(group):
-                groupName = host[group].get('name')
-            elif isinstance(host.get(group), str) and host.has_key(group):
-                groupName = host.get(group)
-
-            #
-            if not inventoryDict.has_key(groupName):
-                inventoryDict.update({groupName: []})
-            if serverName not in inventoryDict[groupName]:
-                inventoryDict[groupName].append(serverName)
-
-        # 
-        if serverIP:
-            inventoryDict['_meta']['hostvars'].update({serverName: {"ansible_ssh_host": serverIP}})
-
-    return inventoryDict
-
-#
 def getApiJson(source, configFile):
     defaults = configFile['defaults']
 
@@ -86,6 +61,40 @@ def getApiJson(source, configFile):
     apiJsonOutput = json.loads(jsonData)
 
     return apiJsonOutput
+
+#
+def addToInventory(inventoryDict, groupList, jsonData):
+    for currentHost in jsonData:
+        serverName = getFromDict(currentHost,['name'])
+        serverIP = getFromDict(currentHost, ['primary_ip','address'])
+
+        #
+        for group in groupList:
+            if group.startswith('custom_'):
+                host = currentHost['custom_fields']
+                valueField = 'value'
+                group = re.sub("^custom_","",group)
+            else:
+                host = currentHost
+                valueField = 'name'
+
+            if isinstance(host.get(group), dict) and host.has_key(group):
+                groupName = host[group].get(field)
+            elif isinstance(host.get(group), str) and host.has_key(group):
+                groupName = host.get(group)
+
+            #
+            if not inventoryDict.has_key(groupName):
+                inventoryDict.update({groupName: []})
+            if serverName not in inventoryDict[groupName]:
+                inventoryDict[groupName].append(serverName)
+
+        # 
+        if serverIP:
+            inventoryDict['_meta']['hostvars'].update({serverName: {"ansible_ssh_host": serverIP}})
+
+    return inventoryDict
+
 
 #
 if __name__ == "__main__":

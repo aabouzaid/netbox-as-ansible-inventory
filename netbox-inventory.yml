@@ -6,3 +6,7 @@ groupBy:
     - device_role
     - rack
     - platform
+    - custom_env
+
+hostVars:
+    - env
