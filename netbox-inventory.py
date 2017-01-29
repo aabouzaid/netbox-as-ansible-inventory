@@ -96,8 +96,9 @@ class NetboxInventory(object):
 
 
     def addHostMeta(self, inventoryDict, hostName, metaValue):
-        if self.utils.getValueByPath(inventoryDict, "_meta.hostvars"):
-            inventoryDict['_meta']['hostvars'].update({serverName: metaValue})
+        ''''''
+        if inventoryDict.get("_meta").has_key("hostvars"):
+            inventoryDict['_meta']['hostvars'].update({hostName: metaValue})
 
 
     def generateInventory(self):
@@ -110,6 +111,7 @@ class NetboxInventory(object):
             serverIP = self.utils.getValueByPath(currentHost, "primary_ip.address")
             self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
             if serverIP:
+                serverIP = serverIP.split("/")[0]
                 self.addHostMeta(ansibleInvenory, serverName, {"ansible_ssh_host": serverIP})
         return ansibleInvenory
 
