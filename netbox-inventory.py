@@ -19,6 +19,7 @@ class Script(object):
         Script cli arguments.
         By default Ansible calls "--list" as argument.
         '''
+
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
         parser.add_argument("-t", "--test-sample", default="api_sample.json", action="store_true",
@@ -73,6 +74,7 @@ class Utils(object):
             If key found in provided path, it will be returned.
             If not, None will be returned.
         '''
+
         try:
             keyOutput = reduce(lambda xdict, key: xdict[key], keyPath.split('.'), sourceDict)
         except KeyError, keyName:
@@ -86,25 +88,52 @@ class Utils(object):
         return keyOutput
 
 #
-class NetboxInventory(object):
+class NetboxAsInventory(object):
+    '''
+    Netbox as a dynamic inventory for Ansible.
+
+    Retrieves hosts list from netbox API and returens Ansible dynamic inventory (Json).
+
+    Attributes:
+        configData: Content of its config which comes from Yaml file.
+    '''
+
     def __init__(self, configData):
         self.defaults = configData.get("defaults")
         self.api_url = self.defaults.get('api_url')
         self.groupBy = configData.get("groupBy")
-        self.utils = Utils()
         self.hostsVarsDict = configData.get("hostsVars")
-
+        self.utils = Utils()
 
     def getHostsList(self):
-        ''''''
+        '''
+        Retrieves hosts list from netbox API.
+
+        Returns:
+            A list of all hosts from netbox API.
+        '''
+
         dataSource = self.api_url
         jsonData = urllib.urlopen(dataSource).read()
         allHostsList = json.loads(jsonData)
         return allHostsList
 
-
     def addHostToInvenoryGroups(self, groupsCategories, inventoryDict, hostData):
-        ''''''
+        '''
+        Add a host to its groups.
+
+        It checks if host groups and adds it to these groups.
+        The groups are defined in script config file.
+
+        Args:
+            groupsCategories: A dict has a categories of groups that will be
+                used as invntory groups.
+            inventoryDict: A dict for inventory has groups and hosts.
+            hostData: A dict has a host data which will be added to inventory.
+
+        Returns:
+            The same dict "inventoryDict" after update.
+        '''
         serverName = hostData.get("name")
         serverCF = hostData.get("custom_fields")
         groupCategories = self.groupBy
@@ -130,7 +159,21 @@ class NetboxInventory(object):
 
 
     def getHostVars(self, hostData, hostVars):
-        ''''''
+        '''
+        Find host vars.
+
+        These vars will be used for host in the inventory.
+        We can select whatever from netbox to be used as Ansible inventory vars.
+        The vars are defined in script config file.
+
+        Args:
+            hostData: A dict has a host data which will be added to inventory.
+            hostVars: A dict has selected fields to be used as host vars.
+
+        Returns:
+            A dict has all vars are associate with the host.
+        '''
+
         hostVarsDict = dict()
         for category in hostVars:
             if category == 'ip':
@@ -152,25 +195,57 @@ class NetboxInventory(object):
                     hostVarsDict.update({varName: varValue})
         return hostVarsDict
 
-    def updateHostMeta(self, inventoryDict, hostName, hostVars):
-        ''''''
+    def updateHostMetaVars(self, inventoryDict, hostName, hostVars):
+        '''
+        Update host meta vars.
+
+        Add host and its vars to "_meta.hostvars" path in the inventory.
+
+        Args:
+            inventoryDict: A dict for inventory has groups and hosts.
+            hostName: Name of the host that will have vars.
+            hostVars: A dict has selected fields to be used as host vars.
+
+        Returns:
+            This function doesn't return, it updates the dict in place.
+        ''' 
+
         if hostVars:
             inventoryDict['_meta']['hostvars'].update({hostName: hostVars})
 
     def generateInventory(self):
-        ''''''
+        '''
+        Generate Ansible dynamic inventory.
+
+        Returns:
+            A dict has inventory with hosts and their vars.
+        '''
+
         ansibleInvenory = {"_meta": {"hostvars": {}}}
         netboxHostsList = self.getHostsList()
 
         for currentHost in netboxHostsList:
             serverName = currentHost.get("name")
-            serverIP = self.utils.getValueByPath(currentHost, "primary_ip.address")
             self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
             hostVars = self.getHostVars(currentHost, self.hostsVarsDict)
-            self.updateHostMeta(ansibleInvenory, serverName, hostVars)
-        return json.dumps(ansibleInvenory)
+            self.updateHostMetaVars(ansibleInvenory, serverName, hostVars)
+        return ansibleInvenory
 
-#
+    def printInventoryJson(self, inventoryDict, printOutput):
+        '''
+        Print inventory.
+
+        Args:
+            inventoryDict: Inventory dict has groups and hosts.
+            printOutput: A boolen, if true the inventory will be printed.
+
+        Returns:
+            It prints the inventory in Json format if condiction is true.
+        '''
+        if printOutput:
+            print json.dumps(inventoryDict)
+
+# Main.
 if __name__ == "__main__":
     # Srcipt vars.
     script = Script()
@@ -178,7 +253,6 @@ if __name__ == "__main__":
     configData = script.openYamlFile(args.config_file)
 
     # Netbox vars.
-    netbox = NetboxInventory(configData)
+    netbox = NetboxAsInventory(configData)
     ansibleInventory = netbox.generateInventory()
-    if args.list:
-        print ansibleInventory
+    netbox.printInventoryJson(ansibleInventory, args.list)
