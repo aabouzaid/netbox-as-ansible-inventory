@@ -86,12 +86,14 @@ class NetboxInventory(object):
 
             for group in groupCategories[category]:
                 groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
-                inventoryDict.update({groupValue: []})
+                #inventoryDict.update({groupValue: []})
 
-            if not inventoryDict.has_key(groupValue):
-                inventoryDict.update({groupValue: []})
-            if serverName not in inventoryDict[groupValue]:
-                inventoryDict[groupValue].append(serverName)
+            if groupValue:
+                if not inventoryDict.has_key(groupValue):
+                    inventoryDict.update({groupValue: []})
+
+                if serverName not in inventoryDict[groupValue]:
+                    inventoryDict[groupValue].append(serverName)
         return inventoryDict
 
 
