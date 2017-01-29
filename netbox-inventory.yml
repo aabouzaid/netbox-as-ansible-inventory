@@ -11,5 +11,9 @@ groupBy:
         - env
 
 hostsVars:
+    ip:
+        ansible_ssh_host: primary_ip
+    general:
+        rack_name: rack
     custom:
-        - env
+        env: env

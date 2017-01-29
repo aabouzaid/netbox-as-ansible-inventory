@@ -43,12 +43,15 @@ class Script(object):
 #
 class Utils(object):
     #
-    def getValueByPath(self, sourceDict, keyPath):
+    def getValueByPath(self, sourceDict, keyPath, ignoreKeyError=False):
         try:
             keyOutput = reduce(lambda xdict, key: xdict[key], keyPath.split('.'), sourceDict)
-        except KeyError, e:
-            print "The key %s is not found. Please remember, Python is case sensitive." % (e)
-            sys.exit(1)
+        except KeyError, keyName:
+            if ignoreKeyError:
+                keyOutput = None
+            else:
+                print "The key %s is not found. Please remember, Python is case sensitive." % (keyName)
+                sys.exit(1)
         except TypeError:
             keyOutput = None
         return keyOutput
@@ -60,6 +63,7 @@ class NetboxInventory(object):
         self.api_url = self.defaults.get('api_url')
         self.groupBy = configData.get("groupBy")
         self.utils = Utils()
+        self.hostsVarsList = configData.get("hostsVars")
 
 
     def getHostsList(self):
@@ -86,7 +90,6 @@ class NetboxInventory(object):
 
             for group in groupCategories[category]:
                 groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
-                #inventoryDict.update({groupValue: []})
 
             if groupValue:
                 if not inventoryDict.has_key(groupValue):
@@ -97,11 +100,31 @@ class NetboxInventory(object):
         return inventoryDict
 
 
-    def addHostMeta(self, inventoryDict, hostName, metaValue):
+    def getHostVars(self, hostData, hostVars):
         ''''''
-        if inventoryDict.get("_meta").has_key("hostvars"):
-            inventoryDict['_meta']['hostvars'].update({hostName: metaValue})
+        hostVarsDict = dict()
+        for category in hostVars:
+            if category == 'ip':
+                dataDict = hostData
+                keyName = "address"
+            elif category == 'general':
+                dataDict = hostData
+                keyName = "name"
+            elif category == 'custom':
+                dataDict = hostData.get("custom_fields")
+                keyName = "value"
 
+            for key, value in hostVars[category].iteritems():
+                varName = key
+                varValue = self.utils.getValueByPath(dataDict, value + "." + keyName, ignoreKeyError=True)
+                if varValue:
+                    hostVarsDict.update({varName: varValue})
+        return hostVarsDict
+
+    def updateHostMeta(self, inventoryDict, hostName, hostVars):
+        ''''''
+        if hostVars:
+            inventoryDict['_meta']['hostvars'].update({hostName: hostVars})
 
     def generateInventory(self):
         ''''''
@@ -112,9 +135,8 @@ class NetboxInventory(object):
             serverName = currentHost.get("name")
             serverIP = self.utils.getValueByPath(currentHost, "primary_ip.address")
             self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
-            if serverIP:
-                serverIP = serverIP.split("/")[0]
-                self.addHostMeta(ansibleInvenory, serverName, {"ansible_ssh_host": serverIP})
+            hostVars = self.getHostVars(currentHost, self.hostsVarsList)
+            self.updateHostMeta(ansibleInvenory, serverName, hostVars)
         return ansibleInvenory
 
 #
