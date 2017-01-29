@@ -10,9 +10,15 @@ import argparse
 
 
 class Script(object):
-    #
-    # Script options.
+    '''
+    All stuff related to script itself.
+    '''
+
     def cliArguments(self):
+        '''
+        Script cli arguments.
+        By default Ansible calls "--list" as argument.
+        '''
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
         parser.add_argument("-t", "--test-sample", default="api_sample.json", action="store_true",
@@ -21,9 +27,17 @@ class Script(object):
         cliArguments = parser.parse_args()
         return cliArguments
 
-    #
-    # Open Yaml file.
     def openYamlFile(self, yamlFile):
+        '''
+        Open Yaml file.
+
+        Args:
+            yamlFile: Relative or absolut path to yaml file.
+
+        Returns:
+            Content of yaml file.
+        '''
+
         # Check if procs list file exists.
         try:
             os.path.isfile(yamlFile)
@@ -37,13 +51,28 @@ class Script(object):
                 yamlFileContent = yaml.load(procsYamlFile)
             except yaml.YAMLError as yamlError:
                 print(yamlError)
-        #
+
         return yamlFileContent
 
 #
 class Utils(object):
-    #
+    '''
+    General utilities.
+    '''
+
     def getValueByPath(self, sourceDict, keyPath, ignoreKeyError=False):
+        '''
+        Get key value from nested dict by path.
+
+        Args:
+            sourceDict: The dict that we look into.
+            keyPath: The path of key in dot notion. e.g. "parentDict.childDict.keyName"
+            ignoreKeyError: Ignore KeyError if the key not found in provided path.
+
+        Returns:
+            If key found in provided path, it will be returned.
+            If not, None will be returned.
+        '''
         try:
             keyOutput = reduce(lambda xdict, key: xdict[key], keyPath.split('.'), sourceDict)
         except KeyError, keyName:
