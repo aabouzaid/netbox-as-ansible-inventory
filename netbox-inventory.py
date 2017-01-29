@@ -2,126 +2,126 @@
 
 import os
 import re
+import sys
 import json
 import yaml
 import urllib
 import argparse
 
 
-# Open Yaml file.
-def openYamlFile(yamlFile):
-    # Check if procs list file exists.
-    try:
-        os.path.isfile(yamlFile)
-    except TypeError:
-        print "Cannot open YAML file: %s." % (yamlFile)
-        sys.exit(1)
-    
-    # Load content of Yaml file.
-    with open(yamlFile, 'r') as yamlFileData:
+class Script(object):
+    #
+    # Script options.
+    def cliArguments(self):
+        parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
+        parser.add_argument("-t", "--test-sample", default="api_sample.json", action="store_true",
+                            help="Test sample of API output instead connect to the real API.")
+        parser.add_argument("--list", "--ansible", help="Print output as Ansible dynamic inventory syntax.", action="store_true")
+        cliArguments = parser.parse_args()
+        return cliArguments
+
+    #
+    # Open Yaml file.
+    def openYamlFile(self, yamlFile):
+        # Check if procs list file exists.
         try:
-            yamlFileContent = yaml.load(yamlFileData)
-        except yaml.YAMLError as yamlError:
-            print(yamlError)
-  
-    return yamlFileContent
+            os.path.isfile(yamlFile)
+        except TypeError:
+            print "Cannot open YAML file: %s." % (yamlFile)
+            sys.exit(1)
 
-#
-def getFromDict(dataDict, mapList):
-    try:
-        keyOutput = reduce(lambda xdict, key: xdict[key], mapList, dataDict)
-        ipPattern = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}")
-        if ipPattern.match(keyOutput):
-            keyOutput = keyOutput.split("/")[0]
-    except TypeError:
-        keyOutput = None
-
-    return keyOutput
-
-#
-def initInventory():
-    mainDict = {}
-    mainDict.update({"_meta": {"hostvars": {}}})
-
-    return mainDict
-
-#
-def getApiJson(source, configFile):
-    defaults = configFile['defaults']
-
-    if source == 'file':
-        dataSource = defaults.get('sample')
-        with open(dataSource, 'r') as jsonOutput:
-            jsonData = jsonOutput.read()
-    elif source == 'url':
-        dataSource = defaults.get('api_url')
-        jsonOutput = urllib.urlopen(dataSource)
-        jsonData = jsonOutput.read()
-
-    apiJsonOutput = json.loads(jsonData)
-
-    return apiJsonOutput
-
-#
-def addToInventory(inventoryDict, groupList, jsonData):
-    for currentHost in jsonData:
-        serverName = getFromDict(currentHost,['name'])
-        serverIP = getFromDict(currentHost, ['primary_ip','address'])
-
+        # Load content of Yaml file.
+        with open(yamlFile, 'r') as procsYamlFile:
+            try:
+                yamlFileContent = yaml.load(procsYamlFile)
+            except yaml.YAMLError as yamlError:
+                print(yamlError)
         #
-        for group in groupList:
-            if group.startswith('custom_'):
-                host = currentHost['custom_fields']
-                valueField = 'value'
-                group = re.sub("^custom_","",group)
-            else:
-                host = currentHost
-                valueField = 'name'
+        return yamlFileContent
 
-            if isinstance(host.get(group), dict) and host.has_key(group):
-                groupName = host[group].get(field)
-            elif isinstance(host.get(group), str) and host.has_key(group):
-                groupName = host.get(group)
+#
+class Utils(object):
+    #
+    def getValueByPath(self, sourceDict, keyPath):
+        try:
+            keyOutput = reduce(lambda xdict, key: xdict[key], keyPath.split('.'), sourceDict)
+        except KeyError, e:
+            print "The key %s is not found. Please remember, Python is case sensitive." % (e)
+            sys.exit(1)
+        except TypeError:
+            keyOutput = None
+        return keyOutput
 
-            #
-            if not inventoryDict.has_key(groupName):
-                inventoryDict.update({groupName: []})
-            if serverName not in inventoryDict[groupName]:
-                inventoryDict[groupName].append(serverName)
+#
+class NetboxInventory(object):
+    def __init__(self, configData):
+        self.defaults = configData.get("defaults")
+        self.api_url = self.defaults.get('api_url')
+        self.groupBy = configData.get("groupBy")
+        self.utils = Utils()
 
-        # 
-        if serverIP:
-            inventoryDict['_meta']['hostvars'].update({serverName: {"ansible_ssh_host": serverIP}})
 
-    return inventoryDict
+    def getHostsList(self):
+        ''''''
+        dataSource = self.api_url
+        jsonData = urllib.urlopen(dataSource).read()
+        allHostsList = json.loads(jsonData)
+        return allHostsList
 
+
+    def addHostToInvenoryGroups(self, groupsCategories, inventoryDict, hostData):
+        ''''''
+        serverName = hostData.get("name")
+        serverCF = hostData.get("custom_fields")
+        groupCategories = self.groupBy
+
+        for category in groupCategories:
+            if category == 'default':
+                dataDict = hostData
+                keyName = "name"
+            elif category == 'custom':
+                dataDict = serverCF
+                keyName = "value"
+
+            for group in groupCategories[category]:
+                groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
+                inventoryDict.update({groupValue: []})
+
+            if not inventoryDict.has_key(groupValue):
+                inventoryDict.update({groupValue: []})
+            if serverName not in inventoryDict[groupValue]:
+                inventoryDict[groupValue].append(serverName)
+        return inventoryDict
+
+
+    def addHostMeta(self, inventoryDict, hostName, metaValue):
+        if self.utils.getValueByPath(inventoryDict, "_meta.hostvars"):
+            inventoryDict['_meta']['hostvars'].update({serverName: metaValue})
+
+
+    def generateInventory(self):
+        ''''''
+        ansibleInvenory = {"_meta": {"hostvars": {}}}
+        netboxHostsList = self.getHostsList()
+
+        for currentHost in netboxHostsList:
+            serverName = currentHost.get("name")
+            serverIP = self.utils.getValueByPath(currentHost, "primary_ip.address")
+            self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
+            if serverIP:
+                self.addHostMeta(ansibleInvenory, serverName, {"ansible_ssh_host": serverIP})
+        return ansibleInvenory
 
 #
 if __name__ == "__main__":
+    # Srcipt vars.
+    script = Script()
+    args = script.cliArguments()
+    configData = script.openYamlFile(args.config_file)
 
-    # Script options.
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
-    parser.add_argument("--list", "--ansible", help="Print output as Ansible dynamic inventory syntax.", action="store_true")
-    parser.add_argument("-t", "--test-sample", help="Test sample of API output instead connect to the real API.", action="store_true")
-    args = parser.parse_args()
-
-    #
-    configFile = openYamlFile(args.config_file)
-
-    #
-    if args.test_sample:
-        dataSource = 'file'
-    else:
-        dataSource = 'url'
-    apiJsonOutput = getApiJson(dataSource, configFile)
-
-    #
-    groupList = configFile['groupBy']
-
-    #
-    ansibleInventory = initInventory()
-
-    #
+    # Netbox vars.
+    netbox = NetboxInventory(configData)
+    ansibleInventory = netbox.generateInventory()
     if args.list:
-        print addToInventory(ansibleInventory, groupList, apiJsonOutput)
+        print ansibleInventory

@@ -1,12 +1,15 @@
 defaults:
-    sample: 'api_sample.json'
+    sample: 'api-sample.json'
     api_url: 'http://localhost/api/dcim/devices/'
 
 groupBy:
-    - device_role
-    - rack
-    - platform
-    - custom_env
+    default:
+        - device_role
+        - rack
+        - platform
+    custom:
+        - env
 
-hostVars:
-    - env
+hostsVars:
+    custom:
+        - env
