@@ -1,19 +1,20 @@
-defaults:
-    sample: 'api-sample.json'
-    api_url: 'http://localhost/api/dcim/devices/'
+netboxInventory:
+    main:
+        sample: 'api-sample.json'
+        api_url: 'http://localhost/api/dcim/devices/'
 
-groupBy:
-    default:
-        - device_role
-        - rack
-        - platform
-    custom:
-        - env
+    groupBy:
+        default:
+            - device_role
+            - rack
+            - platform
+        custom:
+            - env
 
-hostsVars:
-    ip:
-        ansible_ssh_host: primary_ip
-    general:
-        rack_name: rack
-    custom:
-        env: env
+    hostsVars:
+        ip:
+            ansible_ssh_host: primary_ip
+        general:
+            rack_name: rack
+        custom:
+            env: env

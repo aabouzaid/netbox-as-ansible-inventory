@@ -99,10 +99,10 @@ class NetboxAsInventory(object):
     '''
 
     def __init__(self, configData):
-        self.defaults = configData.get("defaults")
-        self.api_url = self.defaults.get('api_url')
-        self.groupBy = configData.get("groupBy")
-        self.hostsVarsDict = configData.get("hostsVars")
+        scriptConfig = configData.get("netboxInventory")
+        self.api_url = scriptConfig["main"].get('api_url')
+        self.groupBy = scriptConfig.setdefault("groupBy", {})
+        self.hostsVars = scriptConfig.setdefault("hostsVars", {})
         self.utils = Utils()
 
     def getHostsList(self):
@@ -112,6 +112,9 @@ class NetboxAsInventory(object):
         Returns:
             A list of all hosts from netbox API.
         '''
+        if not self.api_url:
+            print "Please check API URL in script configuration file."
+            sys.exit(1)
 
         dataSource = self.api_url
         jsonData = urllib.urlopen(dataSource).read()
@@ -136,25 +139,27 @@ class NetboxAsInventory(object):
         '''
         serverName = hostData.get("name")
         serverCF = hostData.get("custom_fields")
-        groupCategories = self.groupBy
 
-        for category in groupCategories:
-            if category == 'default':
-                dataDict = hostData
-                keyName = "name"
-            elif category == 'custom':
-                dataDict = serverCF
-                keyName = "value"
+        if groupsCategories:
+            for category in groupsCategories:
+                if category == 'default':
+                    dataDict = hostData
+                    keyName = "name"
+                elif category == 'custom':
+                    dataDict = serverCF
+                    keyName = "value"
 
-            for group in groupCategories[category]:
-                groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
+                for group in groupsCategories[category]:
+                    groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
 
-            if groupValue:
-                if not inventoryDict.has_key(groupValue):
-                    inventoryDict.update({groupValue: []})
+                if groupValue:
+                    if not inventoryDict.has_key(groupValue):
+                        inventoryDict.update({groupValue: []})
 
-                if serverName not in inventoryDict[groupValue]:
-                    inventoryDict[groupValue].append(serverName)
+                    if serverName not in inventoryDict[groupValue]:
+                        inventoryDict[groupValue].append(serverName)
+        else:
+            inventoryDict["no_group"].append(serverName)
         return inventoryDict
 
 
@@ -175,24 +180,25 @@ class NetboxAsInventory(object):
         '''
 
         hostVarsDict = dict()
-        for category in hostVars:
-            if category == 'ip':
-                dataDict = hostData
-                keyName = "address"
-            elif category == 'general':
-                dataDict = hostData
-                keyName = "name"
-            elif category == 'custom':
-                dataDict = hostData.get("custom_fields")
-                keyName = "value"
+        if hostVars:
+            for category in hostVars:
+                if category == 'ip':
+                    dataDict = hostData
+                    keyName = "address"
+                elif category == 'general':
+                    dataDict = hostData
+                    keyName = "name"
+                elif category == 'custom':
+                    dataDict = hostData.get("custom_fields")
+                    keyName = "value"
 
-            for key, value in hostVars[category].iteritems():
-                varName = key
-                varValue = self.utils.getValueByPath(dataDict, value + "." + keyName, ignoreKeyError=True)
-                if varValue:
-                    if value in hostVars["ip"].values():
-                        varValue = varValue.split("/")[0]
-                    hostVarsDict.update({varName: varValue})
+                for key, value in hostVars[category].iteritems():
+                    varName = key
+                    varValue = self.utils.getValueByPath(dataDict, value + "." + keyName, ignoreKeyError=True)
+                    if varValue:
+                        if hostVars.get("ip") and value in hostVars["ip"].values():
+                            varValue = varValue.split("/")[0]
+                        hostVarsDict.update({varName: varValue})
         return hostVarsDict
 
     def updateHostMetaVars(self, inventoryDict, hostName, hostVars):
@@ -221,13 +227,13 @@ class NetboxAsInventory(object):
             A dict has inventory with hosts and their vars.
         '''
 
-        ansibleInvenory = {"_meta": {"hostvars": {}}}
+        ansibleInvenory = {"no_group": [], "_meta": {"hostvars": {}}}
         netboxHostsList = self.getHostsList()
 
         for currentHost in netboxHostsList:
             serverName = currentHost.get("name")
             self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
-            hostVars = self.getHostVars(currentHost, self.hostsVarsDict)
+            hostVars = self.getHostVars(currentHost, self.hostsVars)
             self.updateHostMetaVars(ansibleInvenory, serverName, hostVars)
         return ansibleInvenory
 
