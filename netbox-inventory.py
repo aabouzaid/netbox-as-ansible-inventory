@@ -137,7 +137,7 @@ class NetboxInventory(object):
             self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
             hostVars = self.getHostVars(currentHost, self.hostsVarsList)
             self.updateHostMeta(ansibleInvenory, serverName, hostVars)
-        return ansibleInvenory
+        return json.dumps(ansibleInvenory)
 
 #
 if __name__ == "__main__":
