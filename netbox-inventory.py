@@ -63,7 +63,7 @@ class NetboxInventory(object):
         self.api_url = self.defaults.get('api_url')
         self.groupBy = configData.get("groupBy")
         self.utils = Utils()
-        self.hostsVarsList = configData.get("hostsVars")
+        self.hostsVarsDict = configData.get("hostsVars")
 
 
     def getHostsList(self):
@@ -118,6 +118,8 @@ class NetboxInventory(object):
                 varName = key
                 varValue = self.utils.getValueByPath(dataDict, value + "." + keyName, ignoreKeyError=True)
                 if varValue:
+                    if value in hostVars["ip"].values():
+                        varValue = varValue.split("/")[0]
                     hostVarsDict.update({varName: varValue})
         return hostVarsDict
 
@@ -135,7 +137,7 @@ class NetboxInventory(object):
             serverName = currentHost.get("name")
             serverIP = self.utils.getValueByPath(currentHost, "primary_ip.address")
             self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
-            hostVars = self.getHostVars(currentHost, self.hostsVarsList)
+            hostVars = self.getHostVars(currentHost, self.hostsVarsDict)
             self.updateHostMeta(ansibleInvenory, serverName, hostVars)
         return json.dumps(ansibleInvenory)
 
