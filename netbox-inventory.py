@@ -159,7 +159,10 @@ class NetboxAsInventory(object):
                     if serverName not in inventoryDict[groupValue]:
                         inventoryDict[groupValue].append(serverName)
         else:
-            inventoryDict["no_group"].append(serverName)
+            if not inventoryDict.has_key("no_group"):
+                inventoryDict.setdefault("no_group", [serverName])
+            else:
+                inventoryDict["no_group"].append(serverName)
         return inventoryDict
 
 
@@ -227,7 +230,7 @@ class NetboxAsInventory(object):
             A dict has inventory with hosts and their vars.
         '''
 
-        ansibleInvenory = {"no_group": [], "_meta": {"hostvars": {}}}
+        ansibleInvenory = {"_meta": {"hostvars": {}}}
         netboxHostsList = self.getHostsList()
 
         for currentHost in netboxHostsList:
