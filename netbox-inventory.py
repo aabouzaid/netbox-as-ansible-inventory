@@ -148,16 +148,17 @@ class NetboxAsInventory(object):
         Returns:
             The same dict "inventoryDict" after update.
         '''
+
         serverName = hostData.get("name")
-        serverCF = hostData.get("custom_fields")
+        categoriesSource = {
+            "default": hostData,
+            "custom": hostData.get("custom_fields")
+        }
 
         if groupsCategories:
             for category in groupsCategories:
                 keyName = self.keyMap[category]
-                if category == 'default':
-                    dataDict = hostData
-                else:
-                    dataDict = serverCF
+                dataDict = categoriesSource[category]
 
                 for group in groupsCategories[category]:
                     groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
@@ -192,14 +193,17 @@ class NetboxAsInventory(object):
             A dict has all vars are associate with the host.
         '''
 
-        hostVarsDict = dict()
         if hostVars:
+            hostVarsDict = dict()
+            categoriesSource = {
+                "ip": hostData,
+                "general": hostData,
+                "custom": hostData.get("custom_fields")
+            }
+
             for category in hostVars:
                 keyName = self.keyMap[category]
-                if category == 'custom':
-                    dataDict = hostData.get("custom_fields")
-                else:
-                    dataDict = hostData
+                dataDict = categoriesSource[category]
 
                 for key, value in hostVars[category].iteritems():
                     varName = key
