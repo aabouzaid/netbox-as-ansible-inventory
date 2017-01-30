@@ -99,11 +99,22 @@ class NetboxAsInventory(object):
     '''
 
     def __init__(self, configData):
+        # General utils.
+        self.utils = Utils()
+
+        # Script configuration.
         scriptConfig = configData.get("netboxInventory")
         self.api_url = scriptConfig["main"].get('api_url')
         self.groupBy = scriptConfig.setdefault("groupBy", {})
         self.hostsVars = scriptConfig.setdefault("hostsVars", {})
-        self.utils = Utils()
+
+        # Get value based on key.
+        self.keyMap = {
+            "default": "name",
+            "general": "name",
+            "custom": "value",
+            "ip": "address"
+        }
 
     def getHostsList(self):
         '''
@@ -142,12 +153,11 @@ class NetboxAsInventory(object):
 
         if groupsCategories:
             for category in groupsCategories:
+                keyName = self.keyMap[category]
                 if category == 'default':
                     dataDict = hostData
-                    keyName = "name"
-                elif category == 'custom':
+                else:
                     dataDict = serverCF
-                    keyName = "value"
 
                 for group in groupsCategories[category]:
                     groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
@@ -185,15 +195,11 @@ class NetboxAsInventory(object):
         hostVarsDict = dict()
         if hostVars:
             for category in hostVars:
-                if category == 'ip':
-                    dataDict = hostData
-                    keyName = "address"
-                elif category == 'general':
-                    dataDict = hostData
-                    keyName = "name"
-                elif category == 'custom':
+                keyName = self.keyMap[category]
+                if category == 'custom':
                     dataDict = hostData.get("custom_fields")
-                    keyName = "value"
+                else:
+                    dataDict = hostData
 
                 for key, value in hostVars[category].iteritems():
                     varName = key
