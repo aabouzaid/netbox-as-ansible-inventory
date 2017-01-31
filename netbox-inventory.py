@@ -22,8 +22,6 @@ class Script(object):
 
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
-        parser.add_argument("-t", "--test-sample", default="api_sample.json", action="store_true",
-                            help="Test sample of API output instead connect to the real API.")
         parser.add_argument("--list", "--ansible", help="Print output as Ansible dynamic inventory syntax.", action="store_true")
         cliArguments = parser.parse_args()
         return cliArguments
@@ -33,13 +31,13 @@ class Script(object):
         Open Yaml file.
 
         Args:
-            yamlFile: Relative or absolut path to yaml file.
+            yamlFile: Relative or absolute path to yaml file.
 
         Returns:
             Content of yaml file.
         '''
 
-        # Check if procs list file exists.
+        # Check if Yaml file exists.
         try:
             os.path.isfile(yamlFile)
         except TypeError:
@@ -92,7 +90,7 @@ class NetboxAsInventory(object):
     '''
     Netbox as a dynamic inventory for Ansible.
 
-    Retrieves hosts list from netbox API and returens Ansible dynamic inventory (Json).
+    Retrieves hosts list from netbox API and returns Ansible dynamic inventory (Json).
 
     Attributes:
         configData: Content of its config which comes from Yaml file.
@@ -141,7 +139,7 @@ class NetboxAsInventory(object):
 
         Args:
             groupsCategories: A dict has a categories of groups that will be
-                used as invntory groups.
+                used as inventory groups.
             inventoryDict: A dict for inventory has groups and hosts.
             hostData: A dict has a host data which will be added to inventory.
 
@@ -256,10 +254,10 @@ class NetboxAsInventory(object):
 
         Args:
             inventoryDict: Inventory dict has groups and hosts.
-            printOutput: A boolen, if true the inventory will be printed.
+            printOutput: A boolean, if true the inventory will be printed.
 
         Returns:
-            It prints the inventory in Json format if condiction is true.
+            It prints the inventory in Json format if condition is true.
         '''
         if printOutput:
             print json.dumps(inventoryDict)
