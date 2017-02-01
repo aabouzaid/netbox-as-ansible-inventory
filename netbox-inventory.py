@@ -23,7 +23,7 @@ class Script(object):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
         parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.", action="store_true")
-        parser.add_argument("--host", help="Print hosts only in the inventory Ansible dynamic inventory syntax..")
+        parser.add_argument("--host", help="Print hosts only in the inventory Ansible dynamic inventory syntax.", action="store")
         cliArguments = parser.parse_args()
         return cliArguments
 
@@ -126,20 +126,19 @@ class NetboxAsInventory(object):
         Returns:
             A list of all hosts from netbox API.
         '''
+
         if not self.api_url:
             print "Please check API URL in script configuration file."
             sys.exit(1)
 
-        dataSource = self.api_url
-        jsonData = urllib.urlopen(dataSource).read()
-        allHostsList = json.loads(jsonData)
-
         if self.host:
-            result = filter(lambda host: host.get("name") == self.host, allHostsList)
+            dataSource = "{}?name={}".format(self.api_url, self.host)
         else:
-            result = allHostsList
+            dataSource = self.api_url
 
-        return result
+        jsonData = urllib.urlopen(dataSource).read()
+        hostsList = json.loads(jsonData)
+        return hostsList
 
     def addHostToInvenoryGroups(self, groupsCategories, inventoryDict, hostData):
         '''
