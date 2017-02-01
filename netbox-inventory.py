@@ -10,6 +10,10 @@ import argparse
 
 
 class Script(object):
+    def __init__(self):
+        # General utils.
+        self.utils = Utils()
+
     '''
     All stuff related to script itself.
     '''
@@ -39,16 +43,14 @@ class Script(object):
         '''
 
         # Check if Yaml file exists.
-        try:
-            os.path.isfile(yamlFile)
-        except TypeError:
-            print "Cannot open YAML file: %s." % (yamlFile)
+        if not os.path.isfile(yamlFile):
+            print "Cannot open YAML file: %s" % (self.utils.getFullPath(yamlFile))
             sys.exit(1)
 
         # Load content of Yaml file.
-        with open(yamlFile, 'r') as procsYamlFile:
+        with open(yamlFile, 'r') as configYamlFile:
             try:
-                yamlFileContent = yaml.load(procsYamlFile)
+                yamlFileContent = yaml.load(configYamlFile)
             except yaml.YAMLError as yamlError:
                 print(yamlError)
 
@@ -86,6 +88,9 @@ class Utils(object):
             keyOutput = None
         return keyOutput
 
+    def getFullPath(self, fileName):
+        return os.path.dirname(os.path.realpath(__file__)) + "/" + fileName
+
 #
 class NetboxAsInventory(object):
     '''
@@ -102,6 +107,7 @@ class NetboxAsInventory(object):
         self.utils = Utils()
 
         # Script arguments.
+        self.config_file = scriptArgs.config_file
         self.list = scriptArgs.list
         self.host = scriptArgs.host
 
@@ -129,6 +135,7 @@ class NetboxAsInventory(object):
 
         if not self.api_url:
             print "Please check API URL in script configuration file."
+            print "Current configuration file: %s" % (self.utils.getFullPath(self.config_file))
             sys.exit(1)
 
         if self.host:
