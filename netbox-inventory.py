@@ -22,7 +22,8 @@ class Script(object):
 
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
-        parser.add_argument("--list", "--ansible", help="Print output as Ansible dynamic inventory syntax.", action="store_true")
+        parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.", action="store_true")
+        parser.add_argument("--host", help="Print hosts only in the inventory Ansible dynamic inventory syntax..")
         cliArguments = parser.parse_args()
         return cliArguments
 
@@ -96,9 +97,13 @@ class NetboxAsInventory(object):
         configData: Content of its config which comes from Yaml file.
     '''
 
-    def __init__(self, configData):
+    def __init__(self, scriptArgs, configData):
         # General utils.
         self.utils = Utils()
+
+        # Script arguments.
+        self.list = scriptArgs.list
+        self.host = scriptArgs.host
 
         # Script configuration.
         scriptConfig = configData.get("netboxInventory")
@@ -128,7 +133,13 @@ class NetboxAsInventory(object):
         dataSource = self.api_url
         jsonData = urllib.urlopen(dataSource).read()
         allHostsList = json.loads(jsonData)
-        return allHostsList
+
+        if self.host:
+            result = filter(lambda host: host.get("name") == self.host, allHostsList)
+        else:
+            result = allHostsList
+
+        return result
 
     def addHostToInvenoryGroups(self, groupsCategories, inventoryDict, hostData):
         '''
@@ -227,8 +238,10 @@ class NetboxAsInventory(object):
             This function doesn't return, it updates the dict in place.
         ''' 
 
-        if hostVars:
+        if hostVars and not self.host:
             inventoryDict['_meta']['hostvars'].update({hostName: hostVars})
+        elif hostVars and self.host:
+            inventoryDict.update({hostName: hostVars})
 
     def generateInventory(self):
         '''
@@ -238,17 +251,19 @@ class NetboxAsInventory(object):
             A dict has inventory with hosts and their vars.
         '''
 
-        ansibleInvenory = {"_meta": {"hostvars": {}}}
         netboxHostsList = self.getHostsList()
-
-        for currentHost in netboxHostsList:
-            serverName = currentHost.get("name")
-            self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
-            hostVars = self.getHostVars(currentHost, self.hostsVars)
-            self.updateHostMetaVars(ansibleInvenory, serverName, hostVars)
+        if netboxHostsList:
+            ansibleInvenory = {"_meta": {"hostvars": {}}}
+            for currentHost in netboxHostsList:
+                serverName = currentHost.get("name")
+                self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
+                hostVars = self.getHostVars(currentHost, self.hostsVars)
+                self.updateHostMetaVars(ansibleInvenory, serverName, hostVars)
+        else:
+            ansibleInvenory = dict()
         return ansibleInvenory
 
-    def printInventoryJson(self, inventoryDict, printOutput):
+    def printInventoryJson(self, inventoryDict):
         '''
         Print inventory.
 
@@ -259,8 +274,15 @@ class NetboxAsInventory(object):
         Returns:
             It prints the inventory in Json format if condition is true.
         '''
-        if printOutput:
-            print json.dumps(inventoryDict)
+
+        if self.host:
+            result = inventoryDict.setdefault(self.host, {})
+        elif self.list:
+            result = inventoryDict
+        else:
+            result = {}
+
+        print json.dumps(result)
 
 # Main.
 if __name__ == "__main__":
@@ -270,6 +292,6 @@ if __name__ == "__main__":
     configData = script.openYamlFile(args.config_file)
 
     # Netbox vars.
-    netbox = NetboxAsInventory(configData)
+    netbox = NetboxAsInventory(args, configData)
     ansibleInventory = netbox.generateInventory()
-    netbox.printInventoryJson(ansibleInventory, args.list)
+    netbox.printInventoryJson(ansibleInventory)
