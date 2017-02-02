@@ -26,7 +26,7 @@ class Script(object):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
         parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.", action="store_true")
-        parser.add_argument("--host", help="Print hosts only in the inventory Ansible dynamic inventory syntax.", action="store")
+        parser.add_argument("--host", help="Print specific host vars as Ansible dynamic inventory syntax.", action="store")
         cliArguments = parser.parse_args()
         return cliArguments
 
@@ -52,7 +52,6 @@ class Script(object):
                 yamlFileContent = yaml.load(configYamlFile)
             except yaml.YAMLError as yamlError:
                 print(yamlError)
-
         return yamlFileContent
 
 #
@@ -88,7 +87,8 @@ class Utils(object):
         return keyOutput
 
     def getFullPath(self, fileName):
-        return os.path.dirname(os.path.realpath(__file__)) + "/" + fileName
+        fullPath = os.path.dirname(os.path.realpath(__file__)) + "/" + fileName
+        return fullPath
 
 #
 class NetboxAsInventory(object):
