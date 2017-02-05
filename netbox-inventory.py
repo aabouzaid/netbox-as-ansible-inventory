@@ -87,6 +87,15 @@ class Utils(object):
         return key_output
 
     def get_full_path(self, file_name):
+        """Get full path of file.
+
+        Args:
+            file_name: The file that will be looked for.
+
+        Returns:
+            Full path of the file.
+        """
+
         full_path = os.path.dirname(os.path.realpath(__file__)) + "/" + file_name
         return full_path
 
