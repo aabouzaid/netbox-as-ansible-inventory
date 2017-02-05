@@ -41,18 +41,17 @@ class Script(object):
             Content of YAML the file.
         """
 
-        # Check if YAML file exists.
-        if not os.path.isfile(yaml_file):
-            print "Cannot open YAML file: %s" % (self.utils.get_full_path(yaml_file))
-            sys.exit(1)
-
         # Load content of YAML file.
-        with open(yaml_file, 'r') as config_yaml_file:
-            try:
-                yaml_file_content = yaml.load(config_yaml_file)
-            except yaml.YAMLError as yaml_error:
-                print(yaml_error)
-                sys.exit(1)
+        try:
+            with open(yaml_file, 'r') as config_yaml_file:
+                try:
+                    yaml_file_content = yaml.load(config_yaml_file)
+                except yaml.YAMLError as yaml_error:
+                    print(yaml_error)
+                    sys.exit(1)
+        except IOError as io_error:
+            print "Cannot open YAML file: %s\n%s" % (self.utils.get_full_path(yaml_file), io_error)
+            sys.exit(1)
         return yaml_file_content
 
 
