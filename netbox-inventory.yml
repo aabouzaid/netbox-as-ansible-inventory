@@ -1,9 +1,8 @@
-netboxInventory:
+nsetbox_inventory:
     main:
-        sample: 'api-sample.json'
         api_url: 'http://localhost/api/dcim/devices/'
 
-    groupBy:
+    group_by:
         default:
             - device_role
             - rack
@@ -11,7 +10,7 @@ netboxInventory:
         custom:
             - env
 
-    hostsVars:
+    hosts_vars:
         ip:
             ansible_ssh_host: primary_ip
         general:

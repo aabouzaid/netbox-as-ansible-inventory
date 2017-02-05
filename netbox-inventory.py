@@ -9,281 +9,275 @@ import argparse
 
 
 class Script(object):
+    """All stuff related to script itself.
+    """
+
     def __init__(self):
         # General utils.
         self.utils = Utils()
 
-    '''
-    All stuff related to script itself.
-    '''
-
-    def cliArguments(self):
-        '''
-        Script cli arguments.
+    def cli_arguments(self):
+        """Script cli arguments.
         By default Ansible calls "--list" as argument.
-        '''
+        """
 
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument("-c","--config-file", default="netbox-inventory.yml", help="Path for configuration of the script.")
-        parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.", action="store_true")
-        parser.add_argument("--host", help="Print specific host vars as Ansible dynamic inventory syntax.", action="store")
-        cliArguments = parser.parse_args()
-        return cliArguments
+        parser.add_argument("-c", "--config-file", default="netbox-inventory.yml",
+                            help="Path for configuration of the script.")
+        parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.",
+                            action="store_true")
+        parser.add_argument("--host", help="Print specific host vars as Ansible dynamic inventory syntax.",
+                            action="store")
+        cli_arguments = parser.parse_args()
+        return cli_arguments
 
-    def openYamlFile(self, yamlFile):
-        '''
-        Open Yaml file.
+    def open_yaml_file(self, yaml_file):
+        """Open Yaml file.
 
         Args:
-            yamlFile: Relative or absolute path to yaml file.
+            yaml_file: Relative or absolute path to yaml file.
 
         Returns:
             Content of yaml file.
-        '''
+        """
 
         # Check if Yaml file exists.
-        if not os.path.isfile(yamlFile):
-            print "Cannot open YAML file: %s" % (self.utils.getFullPath(yamlFile))
+        if not os.path.isfile(yaml_file):
+            print "Cannot open YAML file: %s" % (self.utils.get_full_path(yaml_file))
             sys.exit(1)
 
         # Load content of Yaml file.
-        with open(yamlFile, 'r') as configYamlFile:
+        with open(yaml_file, 'r') as config_yaml_file:
             try:
-                yamlFileContent = yaml.load(configYamlFile)
-            except yaml.YAMLError as yamlError:
-                print(yamlError)
-        return yamlFileContent
+                yaml_file_content = yaml.load(config_yaml_file)
+            except yaml.YAMLError as yaml_error:
+                print(yaml_error)
+                sys.exit(1)
+        return yaml_file_content
+
 
 #
 class Utils(object):
-    '''
-    General utilities.
-    '''
+    """General utilities.
+    """
 
-    def getValueByPath(self, sourceDict, keyPath, ignoreKeyError=False):
-        '''
-        Get key value from nested dict by path.
+    def get_value_by_path(self, source_dict, key_path, ignore_key_error=False):
+        """Get key value from nested dict by path.
 
         Args:
-            sourceDict: The dict that we look into.
-            keyPath: The path of key in dot notion. e.g. "parentDict.childDict.keyName"
-            ignoreKeyError: Ignore KeyError if the key not found in provided path.
+            source_dict: The dict that we look into.
+            key_path: The path of key in dot notion. e.g. "parent_dict.child_dict.key_name"
+            ignore_key_error: Ignore KeyError if the key not found in provided path.
 
         Returns:
             If key found in provided path, it will be returned.
             If not, None will be returned.
-        '''
+        """
 
         try:
-            keyOutput = reduce(lambda xdict, key: xdict[key], keyPath.split('.'), sourceDict)
-        except KeyError, keyName:
-            if ignoreKeyError:
-                keyOutput = None
+            key_output = reduce(lambda xdict, key: xdict[key], key_path.split('.'), source_dict)
+        except KeyError, key_name:
+            if ignore_key_error:
+                key_output = None
             else:
-                print "The key %s is not found. Please remember, Python is case sensitive." % (keyName)
+                print "The key %s is not found. Please remember, Python is case sensitive." % key_name
                 sys.exit(1)
         except TypeError:
-            keyOutput = None
-        return keyOutput
+            key_output = None
+        return key_output
 
-    def getFullPath(self, fileName):
-        fullPath = os.path.dirname(os.path.realpath(__file__)) + "/" + fileName
-        return fullPath
+    def get_full_path(self, file_name):
+        full_path = os.path.dirname(os.path.realpath(__file__)) + "/" + file_name
+        return full_path
+
 
 #
 class NetboxAsInventory(object):
-    '''
-    Netbox as a dynamic inventory for Ansible.
+    """Netbox as a dynamic inventory for Ansible.
 
     Retrieves hosts list from netbox API and returns Ansible dynamic inventory (Json).
 
     Attributes:
-        configData: Content of its config which comes from Yaml file.
-    '''
+        config_data: Content of its config which comes from Yaml file.
+    """
 
-    def __init__(self, scriptArgs, configData):
+    def __init__(self, script_args, config_data):
         # General utils.
         self.utils = Utils()
 
         # Script arguments.
-        self.config_file = scriptArgs.config_file
-        self.list = scriptArgs.list
-        self.host = scriptArgs.host
+        self.config_file = script_args.config_file
+        self.list = script_args.list
+        self.host = script_args.host
 
         # Script configuration.
-        scriptConfig = configData.get("netboxInventory")
-        self.api_url = scriptConfig["main"].get('api_url')
-        self.groupBy = scriptConfig.setdefault("groupBy", {})
-        self.hostsVars = scriptConfig.setdefault("hostsVars", {})
+        script_config = config_data.get("netbox_inventory")
+        if script_config:
+            self.api_url = script_config["main"].get('api_url')
+            self.group_by = script_config.setdefault("group_by", {})
+            self.hosts_vars = script_config.setdefault("hosts_vars", {})
+        else:
+            print "The key 'netbox_inventory' is not found in config file."
+            sys.exit(1)
 
         # Get value based on key.
-        self.keyMap = {
+        self.key_map = {
             "default": "name",
             "general": "name",
             "custom": "value",
             "ip": "address"
         }
 
-    def getHostsList(self):
-        '''
-        Retrieves hosts list from netbox API.
+    def get_hosts_list(self):
+        """Retrieves hosts list from netbox API.
 
         Returns:
             A list of all hosts from netbox API.
-        '''
+        """
 
         if not self.api_url:
             print "Please check API URL in script configuration file."
-            print "Current configuration file: %s" % (self.utils.getFullPath(self.config_file))
+            print "Current configuration file: %s" % (self.utils.get_full_path(self.config_file))
             sys.exit(1)
 
         if self.host:
-            dataSource = "{}?name={}".format(self.api_url, self.host)
+            data_source = "{}?name={}".format(self.api_url, self.host)
         else:
-            dataSource = self.api_url
+            data_source = self.api_url
 
-        jsonData = urllib.urlopen(dataSource).read()
-        hostsList = json.loads(jsonData)
-        return hostsList
+        json_data = urllib.urlopen(data_source).read()
+        hosts_list = json.loads(json_data)
+        return hosts_list
 
-    def addHostToInvenoryGroups(self, groupsCategories, inventoryDict, hostData):
-        '''
-        Add a host to its groups.
+    def add_host_to_inventory_groups(self, groups_categories, inventory_dict, host_data):
+        """Add a host to its groups.
 
         It checks if host groups and adds it to these groups.
         The groups are defined in script config file.
 
         Args:
-            groupsCategories: A dict has a categories of groups that will be
+            groups_categories: A dict has a categories of groups that will be
                 used as inventory groups.
-            inventoryDict: A dict for inventory has groups and hosts.
-            hostData: A dict has a host data which will be added to inventory.
+            inventory_dict: A dict for inventory has groups and hosts.
+            host_data: A dict has a host data which will be added to inventory.
 
         Returns:
-            The same dict "inventoryDict" after update.
-        '''
+            The same dict "inventory_dict" after update.
+        """
 
-        serverName = hostData.get("name")
-        categoriesSource = {
-            "default": hostData,
-            "custom": hostData.get("custom_fields")
+        server_name = host_data.get("name")
+        categories_source = {
+            "default": host_data,
+            "custom": host_data.get("custom_fields")
         }
 
-        if groupsCategories:
-            for category in groupsCategories:
-                keyName = self.keyMap[category]
-                dataDict = categoriesSource[category]
+        if groups_categories:
+            for category in groups_categories:
+                key_name = self.key_map[category]
+                data_dict = categories_source[category]
 
-                for group in groupsCategories[category]:
-                    groupValue = self.utils.getValueByPath(dataDict, group + "." + keyName)
+                for group in groups_categories[category]:
+                    group_value = self.utils.get_value_by_path(data_dict, group + "." + key_name)
 
-                if groupValue:
-                    if not inventoryDict.has_key(groupValue):
-                        inventoryDict.update({groupValue: []})
+                if group_value:
+                    if not inventory_dict.has_key(group_value):
+                        inventory_dict.update({group_value: []})
 
-                    if serverName not in inventoryDict[groupValue]:
-                        inventoryDict[groupValue].append(serverName)
+                    if server_name not in inventory_dict[group_value]:
+                        inventory_dict[group_value].append(server_name)
         else:
-            if not inventoryDict.has_key("no_group"):
-                inventoryDict.setdefault("no_group", [serverName])
+            if not inventory_dict.has_key("no_group"):
+                inventory_dict.setdefault("no_group", [server_name])
             else:
-                inventoryDict["no_group"].append(serverName)
-        return inventoryDict
+                inventory_dict["no_group"].append(server_name)
+        return inventory_dict
 
-
-    def getHostVars(self, hostData, hostVars):
-        '''
-        Find host vars.
+    def get_host_vars(self, host_data, host_vars):
+        """Find host vars.
 
         These vars will be used for host in the inventory.
         We can select whatever from netbox to be used as Ansible inventory vars.
         The vars are defined in script config file.
 
         Args:
-            hostData: A dict has a host data which will be added to inventory.
-            hostVars: A dict has selected fields to be used as host vars.
+            host_data: A dict has a host data which will be added to inventory.
+            host_vars: A dict has selected fields to be used as host vars.
 
         Returns:
             A dict has all vars are associate with the host.
-        '''
+        """
 
-        if hostVars:
-            hostVarsDict = dict()
-            categoriesSource = {
-                "ip": hostData,
-                "general": hostData,
-                "custom": hostData.get("custom_fields")
+        host_vars_dict = dict()
+        if host_vars:
+            categories_source = {
+                "ip": host_data,
+                "general": host_data,
+                "custom": host_data.get("custom_fields")
             }
 
-            for category in hostVars:
-                keyName = self.keyMap[category]
-                dataDict = categoriesSource[category]
+            for category in host_vars:
+                key_name = self.key_map[category]
+                data_dict = categories_source[category]
 
-                for key, value in hostVars[category].iteritems():
-                    varName = key
-                    varValue = self.utils.getValueByPath(dataDict, value + "." + keyName, ignoreKeyError=True)
-                    if varValue:
-                        if hostVars.get("ip") and value in hostVars["ip"].values():
-                            varValue = varValue.split("/")[0]
-                        hostVarsDict.update({varName: varValue})
-        return hostVarsDict
+                for key, value in host_vars[category].iteritems():
+                    var_name = key
+                    var_value = self.utils.get_value_by_path(data_dict, value + "." + key_name, ignore_key_error=True)
+                    if var_value:
+                        if host_vars.get("ip") and value in host_vars["ip"].values():
+                            var_value = var_value.split("/")[0]
+                        host_vars_dict.update({var_name: var_value})
+        return host_vars_dict
 
-    def updateHostMetaVars(self, inventoryDict, hostName, hostVars):
-        '''
-        Update host meta vars.
+    def update_host_meta_vars(self, inventory_dict, host_name, host_vars):
+        """Update host meta vars.
 
         Add host and its vars to "_meta.hostvars" path in the inventory.
 
         Args:
-            inventoryDict: A dict for inventory has groups and hosts.
-            hostName: Name of the host that will have vars.
-            hostVars: A dict has selected fields to be used as host vars.
+            inventory_dict: A dict for inventory has groups and hosts.
+            host_name: Name of the host that will have vars.
+            host_vars: A dict has selected fields to be used as host vars.
 
         Returns:
             This function doesn't return, it updates the dict in place.
-        ''' 
+        """
 
-        if hostVars and not self.host:
-            inventoryDict['_meta']['hostvars'].update({hostName: hostVars})
-        elif hostVars and self.host:
-            inventoryDict.update({hostName: hostVars})
+        if host_vars and not self.host:
+            inventory_dict['_meta']['hostvars'].update({host_name: host_vars})
+        elif host_vars and self.host:
+            inventory_dict.update({host_name: host_vars})
 
-    def generateInventory(self):
-        '''
-        Generate Ansible dynamic inventory.
+    def generate_inventory(self):
+        """Generate Ansible dynamic inventory.
 
         Returns:
             A dict has inventory with hosts and their vars.
-        '''
+        """
+        ansible_inventory = dict()
+        netbox_hosts_list = self.get_hosts_list()
+        if netbox_hosts_list:
+            ansible_inventory.update({"_meta": {"hostvars": {}}})
+            for current_host in netbox_hosts_list:
+                server_name = current_host.get("name")
+                self.add_host_to_inventory_groups(self.group_by, ansible_inventory, current_host)
+                host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                self.update_host_meta_vars(ansible_inventory, server_name, host_vars)
+        return ansible_inventory
 
-        netboxHostsList = self.getHostsList()
-        if netboxHostsList:
-            ansibleInvenory = {"_meta": {"hostvars": {}}}
-            for currentHost in netboxHostsList:
-                serverName = currentHost.get("name")
-                self.addHostToInvenoryGroups(self.groupBy, ansibleInvenory, currentHost)
-                hostVars = self.getHostVars(currentHost, self.hostsVars)
-                self.updateHostMetaVars(ansibleInvenory, serverName, hostVars)
-        else:
-            ansibleInvenory = dict()
-        return ansibleInvenory
-
-    def printInventoryJson(self, inventoryDict):
-        '''
-        Print inventory.
+    def print_inventory_json(self, inventory_dict):
+        """Print inventory.
 
         Args:
-            inventoryDict: Inventory dict has groups and hosts.
-            printOutput: A boolean, if true the inventory will be printed.
+            inventory_dict: Inventory dict has groups and hosts.
 
         Returns:
             It prints the inventory in Json format if condition is true.
-        '''
+        """
 
         if self.host:
-            result = inventoryDict.setdefault(self.host, {})
+            result = inventory_dict.setdefault(self.host, {})
         elif self.list:
-            result = inventoryDict
+            result = inventory_dict
         else:
             result = {}
 
@@ -291,12 +285,12 @@ class NetboxAsInventory(object):
 
 # Main.
 if __name__ == "__main__":
-    # Srcipt vars.
+    # Script vars.
     script = Script()
-    args = script.cliArguments()
-    configData = script.openYamlFile(args.config_file)
+    args = script.cli_arguments()
+    config_data = script.open_yaml_file(args.config_file)
 
     # Netbox vars.
-    netbox = NetboxAsInventory(args, configData)
-    ansibleInventory = netbox.generateInventory()
-    netbox.printInventoryJson(ansibleInventory)
+    netbox = NetboxAsInventory(args, config_data)
+    ansible_inventory = netbox.generate_inventory()
+    netbox.print_inventory_json(ansible_inventory)
