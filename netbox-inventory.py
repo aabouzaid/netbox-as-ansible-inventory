@@ -3,7 +3,7 @@
 import os
 import sys
 import json
-import yaml
+import YAML
 import urllib
 import argparse
 
@@ -32,21 +32,21 @@ class Script(object):
         return cli_arguments
 
     def open_yaml_file(self, yaml_file):
-        """Open Yaml file.
+        """Open YAML file.
 
         Args:
-            yaml_file: Relative or absolute path to yaml file.
+            yaml_file: Relative or absolute path to YAML file.
 
         Returns:
-            Content of yaml file.
+            Content of YAML the file.
         """
 
-        # Check if Yaml file exists.
+        # Check if YAML file exists.
         if not os.path.isfile(yaml_file):
             print "Cannot open YAML file: %s" % (self.utils.get_full_path(yaml_file))
             sys.exit(1)
 
-        # Load content of Yaml file.
+        # Load content of YAML file.
         with open(yaml_file, 'r') as config_yaml_file:
             try:
                 yaml_file_content = yaml.load(config_yaml_file)
@@ -56,7 +56,6 @@ class Script(object):
         return yaml_file_content
 
 
-#
 class Utils(object):
     """General utilities.
     """
@@ -100,14 +99,13 @@ class Utils(object):
         return full_path
 
 
-#
 class NetboxAsInventory(object):
     """Netbox as a dynamic inventory for Ansible.
 
-    Retrieves hosts list from netbox API and returns Ansible dynamic inventory (Json).
+    Retrieves hosts list from netbox API and returns Ansible dynamic inventory (JSON).
 
     Attributes:
-        config_data: Content of its config which comes from Yaml file.
+        config_data: Content of its config which comes from YAML file.
     """
 
     def __init__(self, script_args, config_data):
@@ -186,16 +184,16 @@ class NetboxAsInventory(object):
                 data_dict = categories_source[category]
 
                 for group in groups_categories[category]:
-                    group_value = self.utils.get_value_by_path(data_dict, group + "." + key_name)
+                    group_name = self.utils.get_value_by_path(data_dict, group + "." + key_name)
 
-                if group_value:
-                    if not inventory_dict.has_key(group_value):
-                        inventory_dict.update({group_value: []})
+                if group_name:
+                    if group_name not in inventory_dict:
+                        inventory_dict.update({group_name: []})
 
-                    if server_name not in inventory_dict[group_value]:
-                        inventory_dict[group_value].append(server_name)
+                    if server_name not in inventory_dict[group_name]:
+                        inventory_dict[group_name].append(server_name)
         else:
-            if not inventory_dict.has_key("no_group"):
+            if "no_group" not in inventory_dict:
                 inventory_dict.setdefault("no_group", [server_name])
             else:
                 inventory_dict["no_group"].append(server_name)
@@ -262,6 +260,7 @@ class NetboxAsInventory(object):
         Returns:
             A dict has inventory with hosts and their vars.
         """
+
         ansible_inventory = dict()
         netbox_hosts_list = self.get_hosts_list()
         if netbox_hosts_list:
@@ -280,7 +279,7 @@ class NetboxAsInventory(object):
             inventory_dict: Inventory dict has groups and hosts.
 
         Returns:
-            It prints the inventory in Json format if condition is true.
+            It prints the inventory in JSON format if condition is true.
         """
 
         if self.host:
@@ -289,7 +288,6 @@ class NetboxAsInventory(object):
             result = inventory_dict
         else:
             result = {}
-
         print json.dumps(result)
 
 # Main.
