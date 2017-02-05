@@ -3,7 +3,7 @@
 import os
 import sys
 import json
-import YAML
+import yaml
 import urllib
 import argparse
 
