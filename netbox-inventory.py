@@ -8,13 +8,49 @@ import urllib
 import argparse
 
 
+# Utils.
+def get_value_by_path(source_dict, key_path, ignore_key_error=False):
+    """Get key value from nested dict by path.
+
+    Args:
+        source_dict: The dict that we look into.
+        key_path: The path of key in dot notion. e.g. "parent_dict.child_dict.key_name"
+        ignore_key_error: Ignore KeyError if the key not found in provided path.
+
+    Returns:
+        If key found in provided path, it will be returned.
+        If not, None will be returned.
+    """
+
+    try:
+        key_output = reduce(lambda xdict, key: xdict[key], key_path.split('.'), source_dict)
+    except KeyError, key_name:
+        if ignore_key_error:
+            key_output = None
+        else:
+            print "The key %s is not found. Please remember, Python is case sensitive." % key_name
+            sys.exit(1)
+    except TypeError:
+        key_output = None
+    return key_output
+
+def get_full_path(file_name):
+    """Get full path of file.
+
+    Args:
+        file_name: The file that will be looked for.
+
+    Returns:
+        Full path of the file.
+    """
+
+    full_path = os.path.dirname(os.path.realpath(__file__)) + "/" + file_name
+    return full_path
+
+
 class Script(object):
     """All stuff related to script itself.
     """
-
-    def __init__(self):
-        # General utils.
-        self.utils = Utils()
 
     def cli_arguments(self):
         """Script cli arguments.
@@ -50,52 +86,9 @@ class Script(object):
                     print(yaml_error)
                     sys.exit(1)
         except IOError as io_error:
-            print "Cannot open YAML file: %s\n%s" % (self.utils.get_full_path(yaml_file), io_error)
+            print "Cannot open YAML file: %s\n%s" % (get_full_path(yaml_file), io_error)
             sys.exit(1)
         return yaml_file_content
-
-
-class Utils(object):
-    """General utilities.
-    """
-
-    def get_value_by_path(self, source_dict, key_path, ignore_key_error=False):
-        """Get key value from nested dict by path.
-
-        Args:
-            source_dict: The dict that we look into.
-            key_path: The path of key in dot notion. e.g. "parent_dict.child_dict.key_name"
-            ignore_key_error: Ignore KeyError if the key not found in provided path.
-
-        Returns:
-            If key found in provided path, it will be returned.
-            If not, None will be returned.
-        """
-
-        try:
-            key_output = reduce(lambda xdict, key: xdict[key], key_path.split('.'), source_dict)
-        except KeyError, key_name:
-            if ignore_key_error:
-                key_output = None
-            else:
-                print "The key %s is not found. Please remember, Python is case sensitive." % key_name
-                sys.exit(1)
-        except TypeError:
-            key_output = None
-        return key_output
-
-    def get_full_path(self, file_name):
-        """Get full path of file.
-
-        Args:
-            file_name: The file that will be looked for.
-
-        Returns:
-            Full path of the file.
-        """
-
-        full_path = os.path.dirname(os.path.realpath(__file__)) + "/" + file_name
-        return full_path
 
 
 class NetboxAsInventory(object):
@@ -108,9 +101,6 @@ class NetboxAsInventory(object):
     """
 
     def __init__(self, script_args, config_data):
-        # General utils.
-        self.utils = Utils()
-
         # Script arguments.
         self.config_file = script_args.config_file
         self.list = script_args.list
@@ -143,7 +133,7 @@ class NetboxAsInventory(object):
 
         if not self.api_url:
             print "Please check API URL in script configuration file."
-            print "Current configuration file: %s" % (self.utils.get_full_path(self.config_file))
+            print "Current configuration file: %s" % (get_full_path(self.config_file))
             sys.exit(1)
 
         if self.host:
@@ -183,7 +173,7 @@ class NetboxAsInventory(object):
                 data_dict = categories_source[category]
 
                 for group in groups_categories[category]:
-                    group_name = self.utils.get_value_by_path(data_dict, group + "." + key_name)
+                    group_name = get_value_by_path(data_dict, group + "." + key_name)
 
                 if group_name:
                     if group_name not in inventory_dict:
@@ -227,7 +217,7 @@ class NetboxAsInventory(object):
 
                 for key, value in host_vars[category].iteritems():
                     var_name = key
-                    var_value = self.utils.get_value_by_path(data_dict, value + "." + key_name, ignore_key_error=True)
+                    var_value = get_value_by_path(data_dict, value + "." + key_name, ignore_key_error=True)
                     if var_value:
                         if host_vars.get("ip") and value in host_vars["ip"].values():
                             var_value = var_value.split("/")[0]
