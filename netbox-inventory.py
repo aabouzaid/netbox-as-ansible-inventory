@@ -245,6 +245,7 @@ class NetboxAsInventory(object):
                     var_name = key
                     var_value = get_value_by_path(data_dict, value + "." + key_name, ignore_key_error=True)
                     if var_value:
+                        # Remove CIDR from IP address.
                         if host_vars.get("ip") and value in host_vars["ip"].values():
                             var_value = var_value.split("/")[0]
                         host_vars_dict.update({var_name: var_value})
