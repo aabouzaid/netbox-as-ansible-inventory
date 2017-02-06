@@ -34,6 +34,7 @@ def get_value_by_path(source_dict, key_path, ignore_key_error=False):
         key_output = None
     return key_output
 
+
 def get_full_path(file_name):
     """Get full path of file.
 
@@ -97,17 +98,17 @@ class NetboxAsInventory(object):
     Retrieves hosts list from netbox API and returns Ansible dynamic inventory (JSON).
 
     Attributes:
-        config_data: Content of its config which comes from YAML file.
+        script_config_data: Content of its config which comes from YAML file.
     """
 
-    def __init__(self, script_args, config_data):
+    def __init__(self, script_args, script_config_data):
         # Script arguments.
         self.config_file = script_args.config_file
         self.list = script_args.list
         self.host = script_args.host
 
         # Script configuration.
-        script_config = config_data.get("netbox_inventory")
+        script_config = script_config_data.get("netbox_inventory")
         if script_config:
             self.api_url = script_config["main"].get('api_url')
             self.group_by = script_config.setdefault("group_by", {})
@@ -250,16 +251,16 @@ class NetboxAsInventory(object):
             A dict has inventory with hosts and their vars.
         """
 
-        ansible_inventory = dict()
+        inventory_dict = dict()
         netbox_hosts_list = self.get_hosts_list()
         if netbox_hosts_list:
-            ansible_inventory.update({"_meta": {"hostvars": {}}})
+            inventory_dict.update({"_meta": {"hostvars": {}}})
             for current_host in netbox_hosts_list:
                 server_name = current_host.get("name")
-                self.add_host_to_inventory_groups(self.group_by, ansible_inventory, current_host)
+                self.add_host_to_inventory_groups(self.group_by, inventory_dict, current_host)
                 host_vars = self.get_host_vars(current_host, self.hosts_vars)
-                self.update_host_meta_vars(ansible_inventory, server_name, host_vars)
-        return ansible_inventory
+                self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+        return inventory_dict
 
     def print_inventory_json(self, inventory_dict):
         """Print inventory.
