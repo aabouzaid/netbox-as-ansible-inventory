@@ -146,6 +146,31 @@ class NetboxAsInventory(object):
         hosts_list = json.loads(json_data)
         return hosts_list
 
+    def add_host_to_group(self, server_name, group_value, inventory_dict):
+        """Add a host to a single group.
+
+        It checks if host in a group and adds the host to that group.
+        The group will be added if it's not in the inventory.
+
+        Args:
+            server_name: The server that will be added to a group.
+            group_value: Name that will be used as a group in the inventory.
+            inventory_dict: The inventory which will be updated.
+
+        Returns:
+            This function doesn't return, it updates the dict in place.
+        """
+
+        # The value could be None/null.
+        if group_value:
+            # If the group not in the inventory it will be add.
+            if group_value not in inventory_dict:
+                inventory_dict.update({group_value: []})
+
+            # If the host not in the group it will be add.
+            if server_name not in inventory_dict[group_value]:
+                inventory_dict[group_value].append(server_name)
+
     def add_host_to_inventory_groups(self, groups_categories, inventory_dict, host_data):
         """Add a host to its groups.
 
@@ -179,16 +204,7 @@ class NetboxAsInventory(object):
                 for group in groups_categories[category]:
                     # Try to get group value. If the section not found in netbox, this also will print error message.
                     group_value = get_value_by_path(data_dict, group + "." + key_name)
-
-                    # The value could be None/null.
-                    if group_value:
-                        # If the group not in the inventory it will be add.
-                        if group_value not in inventory_dict:
-                            inventory_dict.update({group_value: []})
-
-                        # If the host not in the group it will be add.
-                        if server_name not in inventory_dict[group_value]:
-                            inventory_dict[group_value].append(server_name)
+                    self.add_host_to_group(server_name, group_value, inventory_dict)
 
         # If no groups in "group_by" section, the host will go to catch-all group.
         else:
