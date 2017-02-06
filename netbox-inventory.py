@@ -149,14 +149,14 @@ class NetboxAsInventory(object):
     def add_host_to_inventory_groups(self, groups_categories, inventory_dict, host_data):
         """Add a host to its groups.
 
-        It checks if host groups and adds it to these groups.
-        The groups are defined in script config file.
+        It checks if host in the groups and adds the host to these groups.
+        The groups are defined in this inventory script config file.
 
         Args:
             groups_categories: A dict has a categories of groups that will be
-                used as inventory groups.
-            inventory_dict: A dict for inventory has groups and hosts.
-            host_data: A dict has a host data which will be added to inventory.
+                used as Ansible inventory groups.
+            inventory_dict: Ansible inventory.
+            host_data: A dict has the host data which will be added to inventory.
 
         Returns:
             The same dict "inventory_dict" after update.
@@ -169,19 +169,28 @@ class NetboxAsInventory(object):
         }
 
         if groups_categories:
+            # There are 2 categories that will be used to group hosts.
+            # One for default section in netbox, and another for "custom_fields" which are being defined by netbox user.
             for category in groups_categories:
                 key_name = self.key_map[category]
                 data_dict = categories_source[category]
 
+                # The groups that will be used to group hosts in the inventory.
                 for group in groups_categories[category]:
-                    group_name = get_value_by_path(data_dict, group + "." + key_name)
+                    # Try to get group value. If the section not found in netbox, this also will print error message.
+                    group_value = get_value_by_path(data_dict, group + "." + key_name)
 
-                if group_name:
-                    if group_name not in inventory_dict:
-                        inventory_dict.update({group_name: []})
+                    # The value could be None/null.
+                    if group_value:
+                        # If the group not in the inventory it will be add.
+                        if group_value not in inventory_dict:
+                            inventory_dict.update({group_value: []})
 
-                    if server_name not in inventory_dict[group_name]:
-                        inventory_dict[group_name].append(server_name)
+                        # If the host not in the group it will be add.
+                        if server_name not in inventory_dict[group_value]:
+                            inventory_dict[group_value].append(server_name)
+
+        # If no groups in "group_by" section, the host will go to catch-all group.
         else:
             if "no_group" not in inventory_dict:
                 inventory_dict.setdefault("no_group", [server_name])
