@@ -28,7 +28,7 @@ def get_value_by_path(source_dict, key_path, ignore_key_error=False):
         if ignore_key_error:
             key_output = None
         else:
-            print "The key %s is not found. Please remember, Python is case sensitive." % key_name
+            print("The key %s is not found. Please remember, Python is case sensitive." % key_name)
             sys.exit(1)
     except TypeError:
         key_output = None
@@ -87,7 +87,7 @@ class Script(object):
                     print(yaml_error)
                     sys.exit(1)
         except IOError as io_error:
-            print "Cannot open YAML file: %s\n%s" % (get_full_path(yaml_file), io_error)
+            print("Cannot open YAML file: %s\n%s" % (get_full_path(yaml_file), io_error))
             sys.exit(1)
         return yaml_file_content
 
@@ -114,7 +114,7 @@ class NetboxAsInventory(object):
             self.group_by = script_config.setdefault("group_by", {})
             self.hosts_vars = script_config.setdefault("hosts_vars", {})
         else:
-            print "The key 'netbox_inventory' is not found in config file."
+            print("The key 'netbox_inventory' is not found in config file.")
             sys.exit(1)
 
         # Get value based on key.
@@ -133,8 +133,8 @@ class NetboxAsInventory(object):
         """
 
         if not self.api_url:
-            print "Please check API URL in script configuration file."
-            print "Current configuration file: %s" % (get_full_path(self.config_file))
+            print("Please check API URL in script configuration file.")
+            print("Current configuration file: %s" % (get_full_path(self.config_file)))
             sys.exit(1)
 
         if self.host:
@@ -171,7 +171,7 @@ class NetboxAsInventory(object):
             if server_name not in inventory_dict[group_value]:
                 inventory_dict[group_value].append(server_name)
 
-    def add_host_to_inventory_groups(self, groups_categories, inventory_dict, host_data):
+    def add_host_to_inventory(self, groups_categories, inventory_dict, host_data):
         """Add a host to its groups.
 
         It checks if host in the groups and adds the host to these groups.
@@ -283,7 +283,7 @@ class NetboxAsInventory(object):
             inventory_dict.update({"_meta": {"hostvars": {}}})
             for current_host in netbox_hosts_list:
                 server_name = current_host.get("name")
-                self.add_host_to_inventory_groups(self.group_by, inventory_dict, current_host)
+                self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
                 host_vars = self.get_host_vars(current_host, self.hosts_vars)
                 self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
@@ -304,7 +304,7 @@ class NetboxAsInventory(object):
             result = inventory_dict
         else:
             result = {}
-        print json.dumps(result)
+        print(json.dumps(result))
 
 # Main.
 if __name__ == "__main__":
