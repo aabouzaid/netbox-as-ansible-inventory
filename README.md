@@ -31,6 +31,12 @@ So if you have a "site" called "US-East", in Ansible you will get a group is cal
 
 If that section is a default section you need to put it under `group_by.default` if it is a custom section put it under `group_by.custom`.
 
+Here the servers will be grouped based on `platform`. So if you have "Ubuntu" and "CentOS" as platforms in Netbox, you will have 2 groups of servers that using that systems.
+```
+group_by:
+    default:
+        - platform
+```
 
 Hosts variables
 ---------------
@@ -40,20 +46,32 @@ There are 3 sections here, first type is `IP`, second one is `General`, and fina
 
 Variables are defined as `Key: Value`. The key is what will be in Ansible and value comes from Netbox.
 
-e.g.
+Here `primary_ip` will be used as value for `ansible_ssh_host`.
 ```
 hosts_vars:
     ip:
         ansible_ssh_host: primary_ip
 ```
-Here `primary_ip` will be used as value of `ansible_ssh_host`.
 
 
 Usage
 -----
--
+```
+usage: netbox-inventory.py [-h] [-c CONFIG_FILE] [--list] [--host HOST]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONFIG_FILE, --config-file CONFIG_FILE
+                        Path for configuration of the script. (default:
+                        netbox-inventory.yml)
+  --list                Print all hosts with vars as Ansible dynamic inventory
+                        syntax. (default: False)
+  --host HOST           Print specific host vars as Ansible dynamic inventory
+                        syntax. (default: None)
+```
 
 
 Output example
 --------------
 -
+
