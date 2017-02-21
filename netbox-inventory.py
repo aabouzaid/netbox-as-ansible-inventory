@@ -2,10 +2,13 @@
 
 import os
 import sys
-import json
 import yaml
 import urllib
 import argparse
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 
 # Utils.
