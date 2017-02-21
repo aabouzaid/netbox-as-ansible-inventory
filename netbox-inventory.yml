@@ -1,4 +1,4 @@
-netbox_inventory:
+netbox:
     main:
         api_url: 'http://localhost/api/dcim/devices/'
 

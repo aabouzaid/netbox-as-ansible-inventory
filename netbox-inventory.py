@@ -108,7 +108,7 @@ class NetboxAsInventory(object):
         self.host = script_args.host
 
         # Script configuration.
-        script_config = script_config_data.get("netbox_inventory")
+        script_config = script_config_data.get("netbox")
         if script_config:
             self.api_url = script_config["main"].get('api_url')
             self.group_by = script_config.setdefault("group_by", {})
