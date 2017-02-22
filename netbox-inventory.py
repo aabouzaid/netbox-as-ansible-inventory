@@ -18,7 +18,6 @@
 import os
 import sys
 import yaml
-import json
 import argparse
 from functools import reduce
 try:
@@ -29,6 +28,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
+
 
 # Utils.
 def get_value_by_path(source_dict, key_path, ignore_key_error=False):
@@ -130,13 +130,14 @@ class NetboxAsInventory(object):
         self.host = script_args.host
 
         # Script configuration.
-        script_config = script_config_data.get("netbox")
+        main_config_key = "netbox"
+        script_config = script_config_data.get(main_config_key)
         if script_config:
             self.api_url = script_config["main"].get('api_url')
             self.group_by = script_config.setdefault("group_by", {})
             self.hosts_vars = script_config.setdefault("hosts_vars", {})
         else:
-            print("The key 'netbox_inventory' is not found in config file.")
+            print("The key '%s' is not found in config file." % main_config_key)
             sys.exit(1)
 
         # Get value based on key.
