@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#
+
 # (c) 2017, Ahmed AbouZaid <http://aabouzaid.com/>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,17 @@
 import os
 import sys
 import yaml
-import urllib
+import json
 import argparse
+from functools import reduce
+try:
+    import urllib2 as urllib
+except ImportError:
+    import urllib.request as urllib
 try:
     import json
 except ImportError:
     import simplejson as json
-
 
 # Utils.
 def get_value_by_path(source_dict, key_path, ignore_key_error=False):
@@ -42,7 +46,7 @@ def get_value_by_path(source_dict, key_path, ignore_key_error=False):
 
     try:
         key_output = reduce(lambda xdict, key: xdict[key], key_path.split('.'), source_dict)
-    except KeyError, key_name:
+    except KeyError as key_name:
         if ignore_key_error:
             key_output = None
         else:
@@ -160,7 +164,7 @@ class NetboxAsInventory(object):
         else:
             data_source = self.api_url
 
-        json_data = urllib.urlopen(data_source).read()
+        json_data = urllib.urlopen(data_source).read().decode('utf8')
         hosts_list = json.loads(json_data)
         return hosts_list
 
@@ -259,7 +263,7 @@ class NetboxAsInventory(object):
                 key_name = self.key_map[category]
                 data_dict = categories_source[category]
 
-                for key, value in host_vars[category].iteritems():
+                for key, value in host_vars[category].items():
                     var_name = key
                     var_value = get_value_by_path(data_dict, value + "." + key_name, ignore_key_error=True)
                     if var_value:
