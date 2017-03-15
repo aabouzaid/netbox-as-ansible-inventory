@@ -8,7 +8,6 @@ ToC
   * [Inventory groups](#inventory-groups)
   * [Hosts variables](#hosts-variables)
   * [Usage](#usage)
-  * [Output example](#output-example)
 
 
 Intro
@@ -19,8 +18,10 @@ You can group servers as you want and based on what you have in Netbox, you can 
 
 
 Requirements
-------------
--
+---------
+```
+pyyaml>=3.11
+```
 
 
 Inventory groups
@@ -70,8 +71,7 @@ optional arguments:
                         syntax. (default: None)
 ```
 
-
-Output example
---------------
--
-
+In Ansible:
+```
+ansible all -i netbox-inventory.py -m ping
+```
