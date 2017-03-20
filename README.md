@@ -20,6 +20,7 @@ You can group servers as you want and based on what you have in Netbox, you can 
 Requirements
 ---------
 ```
+netbox>=1.6
 pyyaml>=3.11
 ```
 
