@@ -37,7 +37,8 @@
     "primary_ip6": null,
     "comments": "",
     "custom_fields": {
-      "Env": {
+      "label": "Web",
+      "env": {
         "id": 1,
         "value": "Prod"
       }
@@ -93,7 +94,8 @@
     "primary_ip6": null,
     "comments": "",
     "custom_fields": {
-      "Env": null
+      "env": null,
+      "label": null
     }
   }
 ]
