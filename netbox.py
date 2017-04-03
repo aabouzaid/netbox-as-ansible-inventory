@@ -81,7 +81,7 @@ class Script(object):
         """
 
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument("-c", "--config-file", default="netbox-inventory.yml",
+        parser.add_argument("-c", "--config-file", default="netbox.yml",
                             help="Path for configuration of the script.")
         parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.",
                             action="store_true")
