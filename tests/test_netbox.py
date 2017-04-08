@@ -7,8 +7,8 @@ import responses
 
 # Pathes.
 test_cfg = {
-  "netbox_config": "files/test_netbox.yml",
-  "api_sample": "files/test_api_output.json"
+  "netbox_config": netbox.get_full_path("tests/files/test_netbox.yml"),
+  "api_sample": netbox.get_full_path("tests/files/test_api_output.json")
 }
 
 # Get Netbox config and API output.
