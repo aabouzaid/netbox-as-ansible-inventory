@@ -19,11 +19,8 @@ import os
 import sys
 import yaml
 import argparse
+import requests
 from functools import reduce
-try:
-    import urllib2 as urllib
-except ImportError:
-    import urllib.request as urllib
 try:
     import json
 except ImportError:
@@ -164,8 +161,7 @@ class NetboxAsInventory(object):
         else:
             data_source = api_url
 
-        json_data = urllib.urlopen(data_source).read().decode('utf8')
-        hosts_list = json.loads(json_data)
+        hosts_list = requests.get(data_source).json()
         return hosts_list
 
     def add_host_to_group(self, server_name, group_value, inventory_dict):
