@@ -29,3 +29,13 @@ netbox = netbox.NetboxAsInventory(args, config)
 responses.add(responses.GET, netbox.api_url,
     body=netbox_api_output, status=200,
     content_type='application/json')
+
+
+#
+# Tests.
+class TestNetboxAsInventory(object):
+
+    @responses.activate
+    def test_get_hosts_list(self):
+        hosts_list = netbox.get_hosts_list(netbox.api_url)
+        assert isinstance(hosts_list, list)
