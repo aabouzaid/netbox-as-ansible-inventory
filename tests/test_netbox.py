@@ -39,7 +39,19 @@ class TestNetboxAsInventory(object):
     @responses.activate
     def test_get_hosts_list(self):
         """
-        Test getting hosts list from API and make sure it returns a list.
+        Test get hosts list from API and make sure it returns a list.
         """
+
         hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
+
+    def test_add_host_to_group(self):
+        """
+        Test add host to its group inside inventory dict.
+        """
+
+        server_name = "fake_server"
+        group_value = "fake_group"
+        inventory_dict = {}
+        netbox.add_host_to_group(server_name, group_value, inventory_dict)
+        assert server_name in inventory_dict[group_value]
