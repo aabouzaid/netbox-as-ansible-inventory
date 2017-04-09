@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import netbox
+import pytest
 import responses
+import netbox
 
 #
 # Init.
@@ -44,12 +45,14 @@ class TestNetboxAsInventory(object):
         hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
 
-    def test_add_host_to_group(self):
+
+    @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
+        ("fake_server", "fake_group", {}),
+    ])
+    def test_add_host_to_group(self, server_name, group_value, inventory_dict):
         """
         Test add host to its group inside inventory dict.
         """
-        server_name = "fake_server"
-        group_value = "fake_group"
-        inventory_dict = {}
+
         netbox.add_host_to_group(server_name, group_value, inventory_dict)
         assert server_name in inventory_dict[group_value]
