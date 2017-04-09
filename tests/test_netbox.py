@@ -5,7 +5,7 @@ import responses
 #
 # Init.
 
-# Pathes.
+# Paths.
 test_cfg = {
     "netbox_config": netbox.get_full_path("tests/files/test_netbox.yml"),
     "api_sample": netbox.get_full_path("tests/files/test_api_output.json")
@@ -41,7 +41,6 @@ class TestNetboxAsInventory(object):
         """
         Test get hosts list from API and make sure it returns a list.
         """
-
         hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
 
@@ -49,7 +48,6 @@ class TestNetboxAsInventory(object):
         """
         Test add host to its group inside inventory dict.
         """
-
         server_name = "fake_server"
         group_value = "fake_group"
         inventory_dict = {}
