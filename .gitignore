@@ -2,3 +2,4 @@ api-sample.json
 *.pyc
 .cache
 .idea
+.coverage
