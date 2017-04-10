@@ -1,6 +1,8 @@
 Netbox external inventory script
 ================================
 
+[![Coverage Status](https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg?branch=master)](https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory?branch=master)
+
 ToC
 ---
   * [Intro](#intro)
