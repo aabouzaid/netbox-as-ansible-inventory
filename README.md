@@ -1,34 +1,34 @@
-Netbox external inventory script
-================================
+Netbox dynamic inventory script
+===============================
 
 [![Build Status](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory.svg?branch=master)](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory) [![Coverage Status](https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg?branch=master)](https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory?branch=master)
 
 ToC
 ---
   * [Intro](#intro)
-  * [Requirements](#requirements)
-  * [Inventory groups](#inventory-groups)
+  * [Compatibility](#compatibility)
+  * [Grouping](#grouping)
   * [Hosts variables](#hosts-variables)
+  * [Options](#options)
   * [Usage](#usage)
 
 
 Intro
 -----
-This script uses NetBox as a dynamic inventory for Ansible. [Netbox](https://github.com/digitalocean/netbox/) is an IP address management (IPAM) and data center infrastructure management (DCIM) tool. It's nice, modern, and has good APIs ... so it's a pretty nice option to serve as a "Source of Truth".
+This script uses NetBox as a dynamic inventory for Ansible.
+[Netbox](https://github.com/digitalocean/netbox/) is an IP address management (IPAM) and data center infrastructure management (DCIM) tool. It's nice, modern, and has good APIs ... so it's a pretty nice option to serve as a "Source of Truth".
 
 You can group servers as you want and based on what you have in Netbox, you can select fields as groups or as vars for hosts. And you can use default fields or custom fields.
 
 
-Requirements
----------
-```
-netbox>=1.6
-pyyaml>=3.11
+Compatibility
+-------------
+This script works with `netbox >= v1.6`, but most probably it will work with all netbox v1.0 and above. 
 ```
 
 
-Inventory groups
-----------------
+Grouping
+--------
 Server could be grouped by any section in Netbox, e.g. you can group hosts by "site, "rack", "role", "platform", or any other section in Netbox (please remember, right now you need to use the names as in API not in UI).
 
 So if you have a "site" called "US-East", in Ansible you will get a group is called "US-East" has all hosts in that site.
@@ -41,6 +41,7 @@ group_by:
     default:
         - platform
 ```
+
 
 Hosts variables
 ---------------
@@ -58,23 +59,26 @@ hosts_vars:
 ```
 
 
-Usage
------
+Options
+-------
 ```
-usage: netbox-inventory.py [-h] [-c CONFIG_FILE] [--list] [--host HOST]
+$ netbox.py -h
+usage: netbox.py [-h] [-c CONFIG_FILE] [--list] [--host HOST]
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG_FILE, --config-file CONFIG_FILE
                         Path for configuration of the script. (default:
-                        netbox-inventory.yml)
+                        netbox.yml)
   --list                Print all hosts with vars as Ansible dynamic inventory
                         syntax. (default: False)
   --host HOST           Print specific host vars as Ansible dynamic inventory
                         syntax. (default: None)
 ```
 
-In Ansible:
+
+Usage
+-----
 ```
-ansible all -i netbox-inventory.py -m ping
+$ ansible all -i netbox.py -m ping
 ```
