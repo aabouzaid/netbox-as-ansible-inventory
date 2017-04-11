@@ -24,7 +24,6 @@ You can group servers as you want and based on what you have in Netbox, you can 
 Compatibility
 -------------
 This script works with `netbox >= v1.6`, but most probably it will work with all netbox v1.0 and above. 
-```
 
 
 Grouping
