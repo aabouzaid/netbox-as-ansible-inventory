@@ -34,7 +34,7 @@ responses.add(responses.GET, netbox.api_url,
               content_type='application/json')
 
 # Fake single host.
-fake_host = json.dumps(
+fake_host = json.loads('''
   {
     "id": 1,
     "name": "fake_host",
@@ -54,23 +54,23 @@ fake_host = json.dumps(
       "name": "Fake Server",
       "slug": "fake_server"
     },
-    "tenant": "null",
-    "platform": "null",
+    "tenant": null,
+    "platform": null,
     "serial": "",
     "asset_tag": "fake_tag",
     "rack": {
       "id": 1,
       "name": "fake_rack01",
-      "facility_id": "null",
+      "facility_id": null,
       "display_name": "Fack Rack01"
     },
-    "position": "null",
-    "face": "null",
-    "parent_device": "null",
-    "status": "true",
-    "primary_ip": "null",
-    "primary_ip4": "null",
-    "primary_ip6": "null",
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": null,
+    "primary_ip4": null,
+    "primary_ip6": null,
     "comments": "",
     "custom_fields": {
       "label": "Web",
@@ -80,7 +80,8 @@ fake_host = json.dumps(
       }
     }
   }
-)
+''')
+
 
 #
 # Tests.
@@ -111,7 +112,7 @@ class TestNetboxAsInventory(object):
         (
             {"default": ["device_role", "rack", "platform"]},
             {"_meta": {"hostvars": {}}},
-            json.loads(fake_host)
+            fake_host
         )
     ])
     def test_add_host_to_group(self, groups_categories, inventory_dict, host_data):
