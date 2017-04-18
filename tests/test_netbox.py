@@ -68,8 +68,16 @@ fake_host = json.loads('''
     "face": null,
     "parent_device": null,
     "status": true,
-    "primary_ip": null,
-    "primary_ip4": null,
+    "primary_ip": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip4": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
     "primary_ip6": null,
     "comments": "",
     "custom_fields": {
@@ -124,3 +132,20 @@ class TestNetboxAsInventory(object):
         assert "hostvars" in inventory_dict["_meta"]
         assert "fake_rack01" in inventory_dict
         assert "fake_host" in inventory_dict["fake_rack01"]
+
+
+    @pytest.mark.parametrize("host_data, host_vars", [
+        (
+            fake_host,
+            {"ip": {"ansible_ssh_host": "primary_ip"}, "general": {"rack_name": "rack"}}
+        )
+    ])
+    def test_get_host_vars(self, host_data, host_vars):
+        """
+        Test get host vars based on specific tags
+        (which come from inventory script config file).
+        """
+
+        host_vars = netbox.get_host_vars(host_data, host_vars)
+        assert host_vars["ansible_ssh_host"] == "192.168.0.2"
+        assert host_vars["rack_name"] == "fake_rack01"
