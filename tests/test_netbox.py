@@ -96,7 +96,7 @@ fake_host = json.loads('''
 class TestNetboxAsInventory(object):
 
     @responses.activate
-    @pytest.mark.parametrize("api_url" [
+    @pytest.mark.parametrize("api_url", [
         (netbox.api_url)
     ])
     def test_get_hosts_list(self, api_url):
