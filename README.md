@@ -1,6 +1,7 @@
 Netbox dynamic inventory script
 ===============================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8deda33a029a45a8bc360df4dcbf8660)](https://www.codacy.com/app/AAbouZaid/netbox-as-ansible-inventory?utm_source=github.com&utm_medium=referral&utm_content=AAbouZaid/netbox-as-ansible-inventory&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory.svg?branch=master)](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory) [![Coverage Status](https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg?branch=master)](https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory?branch=master)
 
 ToC
