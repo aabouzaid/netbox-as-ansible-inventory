@@ -118,11 +118,13 @@ class TestNetboxAsInventory(object):
         assert server_name in inventory_dict[group_value]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
-        ({"default": ["device_role", "rack", "platform"]},
-         {"_meta": {"hostvars": {}}},
-         fake_host)
+        (
+            {"default": ["device_role", "rack", "platform"]},
+            {"_meta": {"hostvars": {}}},
+            fake_host
+        )
     ])
-    def test_add_host_to_group(self, groups_categories, inventory_dict, host_data):
+    def test_add_host_to_inventory(self, groups_categories, inventory_dict, host_data):
         """
         Test add host to its group in inventory dict (grouping).
         """
