@@ -97,7 +97,7 @@ class TestNetboxAsInventory(object):
 
     @responses.activate
     @pytest.mark.parametrize("api_url", [
-        (netbox.api_url)
+        netbox.api_url
     ])
     def test_get_hosts_list(self, api_url):
         """
@@ -118,11 +118,9 @@ class TestNetboxAsInventory(object):
         assert server_name in inventory_dict[group_value]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
-        (
-            {"default": ["device_role", "rack", "platform"]},
-            {"_meta": {"hostvars": {}}},
-            fake_host
-        )
+        ({"default": ["device_role", "rack", "platform"]},
+         {"_meta": {"hostvars": {}}},
+         fake_host)
     ])
     def test_add_host_to_inventory(self, groups_categories, inventory_dict, host_data):
         """
