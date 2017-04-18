@@ -15,7 +15,7 @@ test_cfg = {
 
 # Get Netbox config and API output.
 config = netbox.open_yaml_file(test_cfg["netbox_config"])
-with open(test_cfg["api_sample"]) as data_file:    
+with open(test_cfg["api_sample"]) as data_file:
     netbox_api_output = data_file.read()
 
 
@@ -103,7 +103,6 @@ class TestNetboxAsInventory(object):
         hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
 
-
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
         ("fake_server", "fake_group", {}),
     ])
@@ -114,7 +113,6 @@ class TestNetboxAsInventory(object):
 
         netbox.add_host_to_group(server_name, group_value, inventory_dict)
         assert server_name in inventory_dict[group_value]
-
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
         (
@@ -132,7 +130,6 @@ class TestNetboxAsInventory(object):
         assert "hostvars" in inventory_dict["_meta"]
         assert "fake_rack01" in inventory_dict
         assert "fake_host" in inventory_dict["fake_rack01"]
-
 
     @pytest.mark.parametrize("host_data, host_vars", [
         (
