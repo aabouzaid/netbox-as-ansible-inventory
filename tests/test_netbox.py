@@ -107,7 +107,7 @@ class TestNetboxAsInventory(object):
         assert isinstance(hosts_list, list)
 
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
-        ("fake_server", "fake_group", {}),
+        ("fake_server", "fake_group", {})
     ])
     def test_add_host_to_group(self, server_name, group_value, inventory_dict):
         """
@@ -118,11 +118,9 @@ class TestNetboxAsInventory(object):
         assert server_name in inventory_dict[group_value]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
-        (
-            {"default": ["device_role", "rack", "platform"]},
-            {"_meta": {"hostvars": {}}},
-            fake_host
-        )
+        ({"default": ["device_role", "rack", "platform"]},
+         {"_meta": {"hostvars": {}}},
+         fake_host)
     ])
     def test_add_host_to_group(self, groups_categories, inventory_dict, host_data):
         """
@@ -135,10 +133,8 @@ class TestNetboxAsInventory(object):
         assert "fake_host" in inventory_dict["fake_rack01"]
 
     @pytest.mark.parametrize("host_data, host_vars", [
-        (
-            fake_host,
-            {"ip": {"ansible_ssh_host": "primary_ip"}, "general": {"rack_name": "rack"}}
-        )
+        (fake_host,
+         {"ip": {"ansible_ssh_host": "primary_ip"}, "general": {"rack_name": "rack"}})
     ])
     def test_get_host_vars(self, host_data, host_vars):
         """
