@@ -1,7 +1,7 @@
 Netbox dynamic inventory script
 ===============================
 
-[![Build Status](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory.svg?branch=master)](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory) [![Codacy Badge](https://img.shields.io/codacy/8deda33a029a45a8bc360df4dcbf8660.svg)](https://www.codacy.com/app/AAbouZaid/netbox-as-ansible-inventory) [![Coverage Status](https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg?branch=master)](https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory?branch=master)
+[![Build Status](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory.svg?branch=master)](https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory) [![Codacy Badge](https://img.shields.io/codacy/8deda33a029a45a8bc360df4dcbf8660.svg)](https://www.codacy.com/app/AAbouZaid/netbox-as-ansible-inventory) [![Code Health](https://landscape.io/github/AAbouZaid/netbox-as-ansible-inventory/master/landscape.svg?style=flat)](https://landscape.io/github/AAbouZaid/netbox-as-ansible-inventory/master) [![Coverage Status](https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg?branch=master)](https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory?branch=master)
 
 ToC
 ---
