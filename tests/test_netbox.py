@@ -152,8 +152,7 @@ class TestNetboxAsInventory(object):
     ])
     def test_update_host_meta_vars(self, inventory_dict, host_name, host_vars):
         """
-        Test get host vars based on specific tags
-        (which come from inventory script config file).
+        Test update host vars in inventory dict.
         """
         netbox.update_host_meta_vars(inventory_dict, host_name, host_vars)
         assert  inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
