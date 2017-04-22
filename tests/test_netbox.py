@@ -142,3 +142,18 @@ class TestNetboxAsInventory(object):
         host_vars = netbox.get_host_vars(host_data, host_vars)
         assert host_vars["ansible_ssh_host"] == "192.168.0.2"
         assert host_vars["rack_name"] == "fake_rack01"
+
+    @pytest.mark.parametrize("inventory_dict, host_name, host_vars", [
+        (
+            {"_meta": {"hostvars": {}}},
+            "fake_host",
+            {"rack_name": "fake_rack01"}
+        )
+    ])
+    def test_update_host_meta_vars(self, inventory_dict, host_name, host_vars):
+        """
+        Test get host vars based on specific tags
+        (which come from inventory script config file).
+        """
+        netbox.update_host_meta_vars(inventory_dict, host_name, host_vars)
+        assert  inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
