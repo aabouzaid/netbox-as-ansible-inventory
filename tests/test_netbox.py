@@ -28,10 +28,12 @@ class Args(object):
 # Init Netbox class.
 netbox = netbox.NetboxAsInventory(Args, config)
 
+
 # Fake API response.
-responses.add(responses.GET, netbox.api_url,
-              body=netbox_api_output, status=200,
-              content_type='application/json')
+def fake_json_reponse():
+    responses.add(responses.GET, netbox.api_url,
+                  body=netbox_api_output, status=200,
+                  content_type='application/json')
 
 # Fake single host.
 fake_host = json.loads('''
@@ -96,14 +98,12 @@ fake_host = json.loads('''
 class TestNetboxAsInventory(object):
 
     @responses.activate
-    @pytest.mark.parametrize("api_url", [
-        netbox.api_url
-    ])
-    def test_get_hosts_list(self, api_url):
+    def test_get_hosts_list(self):
         """
         Test get hosts list from API and make sure it returns a list.
         """
-        hosts_list = netbox.get_hosts_list(api_url)
+        fake_json_reponse()
+        hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
 
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
