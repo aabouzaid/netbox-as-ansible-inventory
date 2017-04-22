@@ -155,4 +155,4 @@ class TestNetboxAsInventory(object):
         Test update host vars in inventory dict.
         """
         netbox.update_host_meta_vars(inventory_dict, host_name, host_vars)
-        assert  inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
+        assert inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
