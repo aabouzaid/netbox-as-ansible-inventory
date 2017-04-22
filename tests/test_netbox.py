@@ -156,3 +156,13 @@ class TestNetboxAsInventory(object):
         """
         netbox.update_host_meta_vars(inventory_dict, host_name, host_vars)
         assert inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
+
+    @responses.activate
+    def test_generate_inventory(self):
+        """
+        Test generateing final Ansible inventory before convert it to JSON.
+        """
+        fake_json_reponse()
+        ansible_inventory = netbox.generate_inventory()
+        assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
+        assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
