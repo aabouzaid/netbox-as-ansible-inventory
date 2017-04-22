@@ -1,8 +1,61 @@
 [
   {
+    "id": 1,
+    "name": "fake_host01",
+    "display_name": "Fake Host 01",
+    "device_type": {
+      "id": 1,
+      "manufacturer": {
+        "id": 8,
+        "name": "Fake Manufacturer",
+        "slug": "fake_manufacturer"
+      },
+      "model": "all",
+      "slug": "all"
+    },
+    "device_role": {
+      "id": 8,
+      "name": "Fake Server",
+      "slug": "fake_server"
+    },
+    "tenant": null,
+    "platform": null,
+    "serial": "",
+    "asset_tag": "fake_tag",
+    "rack": {
+      "id": 1,
+      "name": "fake_rack01",
+      "facility_id": null,
+      "display_name": "Fake Rack01"
+    },
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip4": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip6": null,
+    "comments": "",
+    "custom_fields": {
+      "label": "Web",
+      "env": {
+        "id": 1,
+        "value": "Prod"
+      }
+    }
+  },
+  {
     "id": 2,
-    "name": "xserver2",
-    "display_name": "xserver2",
+    "name": "fake_host02",
+    "display_name": "fake_host02",
     "device_type": {
       "id": 1,
       "manufacturer": {
@@ -21,12 +74,12 @@
     "tenant": null,
     "platform": null,
     "serial": "",
-    "asset_tag": "x1",
+    "asset_tag": "xtag",
     "rack": {
       "id": 1,
-      "name": "xrack",
+      "name": "fake_rack01",
       "facility_id": null,
-      "display_name": "xrack"
+      "display_name": "Fake Host 02"
     },
     "position": null,
     "face": null,
@@ -37,65 +90,11 @@
     "primary_ip6": null,
     "comments": "",
     "custom_fields": {
-      "label": "Web",
+      "label": "DB",
       "env": {
         "id": 1,
         "value": "Prod"
       }
-    }
-  },
-  {
-    "id": 1,
-    "name": "xserver",
-    "display_name": "xserver",
-    "device_type": {
-      "id": 1,
-      "manufacturer": {
-        "id": 8,
-        "name": "Super Micro",
-        "slug": "super-micro"
-      },
-      "model": "all",
-      "slug": "all"
-    },
-    "device_role": {
-      "id": 8,
-      "name": "Server",
-      "slug": "server"
-    },
-    "tenant": null,
-    "platform": {
-      "id": 7,
-      "name": "ubuntu",
-      "slug": "ubuntu"
-    },
-    "serial": "",
-    "asset_tag": null,
-    "rack": {
-      "id": 1,
-      "name": "xrack",
-      "facility_id": null,
-      "display_name": "xrack"
-    },
-    "position": null,
-    "face": null,
-    "parent_device": null,
-    "status": true,
-    "primary_ip": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.1/32"
-    },
-    "primary_ip4": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.1/32"
-    },
-    "primary_ip6": null,
-    "comments": "",
-    "custom_fields": {
-      "env": null,
-      "label": null
     }
   }
 ]
