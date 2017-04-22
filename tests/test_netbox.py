@@ -166,3 +166,24 @@ class TestNetboxAsInventory(object):
         ansible_inventory = netbox.generate_inventory()
         assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
         assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
+
+    @pytest.mark.parametrize("inventory_dict", [
+        {
+            "fake_rack01": ["fake_host01", "fake_host02"],
+            "Fake Server": ["fake_host01"],
+            "Server": ["fake_host02"],
+            "_meta": {
+                "hostvars": {
+                    "fake_host02": {"rack_name": "fake_rack01"},
+                    "fake_host01": {"ansible_ssh_host": "192.168.0.2", "rack_name": "fake_rack01"}
+                },
+            },
+        }
+    ])
+    def test_print_inventory_json(self, capsys, inventory_dict):
+        """
+        Test printing final Ansible inventory in JSON format.
+        """
+        netbox.print_inventory_json(inventory_dict)
+        function_stdout, function_stderr = capsys.readouterr()
+        assert json.loads(function_stdout) == inventory_dict
