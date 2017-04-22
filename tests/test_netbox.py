@@ -9,8 +9,8 @@ import json
 
 # Paths.
 test_cfg = {
-    "netbox_config": netbox.get_full_path("tests/files/test_netbox.yml"),
-    "api_sample": netbox.get_full_path("tests/files/test_api_output.json")
+    "netbox_config": "tests/files/test_netbox.yml",
+    "api_sample": "tests/files/test_api_output.json"
 }
 
 # Get Netbox config and API output.
