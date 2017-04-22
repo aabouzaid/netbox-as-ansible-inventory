@@ -30,7 +30,7 @@ netbox = netbox.NetboxAsInventory(Args, config)
 
 
 # Fake API response.
-def fake_json_reponse():
+def fake_json_response():
     responses.add(responses.GET, netbox.api_url,
                   body=netbox_api_output, status=200,
                   content_type='application/json')
@@ -64,7 +64,7 @@ fake_host = json.loads('''
       "id": 1,
       "name": "fake_rack01",
       "facility_id": null,
-      "display_name": "Fack Rack01"
+      "display_name": "Fake Rack01"
     },
     "position": null,
     "face": null,
@@ -102,7 +102,7 @@ class TestNetboxAsInventory(object):
         """
         Test get hosts list from API and make sure it returns a list.
         """
-        fake_json_reponse()
+        fake_json_response()
         hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
 
@@ -162,7 +162,7 @@ class TestNetboxAsInventory(object):
         """
         Test generateing final Ansible inventory before convert it to JSON.
         """
-        fake_json_reponse()
+        fake_json_response()
         ansible_inventory = netbox.generate_inventory()
         assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
         assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
