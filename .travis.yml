@@ -7,7 +7,7 @@ install:
   - pip install -r requirements.txt
   - pip install -r tests/requirements.txt
 script:
-  - pep8 --ignore=E501 .
+  - pep8 -v --ignore=E501 .
   - py.test --cov=netbox
 after_success:
   coveralls
