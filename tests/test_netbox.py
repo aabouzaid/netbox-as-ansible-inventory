@@ -113,7 +113,6 @@ class TestNetboxAsInventory(object):
         """
         Test add host to its group inside inventory dict.
         """
-
         netbox.add_host_to_group(server_name, group_value, inventory_dict)
         assert server_name in inventory_dict[group_value]
 
@@ -126,7 +125,6 @@ class TestNetboxAsInventory(object):
         """
         Test add host to its group in inventory dict (grouping).
         """
-
         netbox.add_host_to_inventory(groups_categories, inventory_dict, host_data)
         assert "hostvars" in inventory_dict["_meta"]
         assert "fake_rack01" in inventory_dict
@@ -141,7 +139,6 @@ class TestNetboxAsInventory(object):
         Test get host vars based on specific tags
         (which come from inventory script config file).
         """
-
         host_vars = netbox.get_host_vars(host_data, host_vars)
         assert host_vars["ansible_ssh_host"] == "192.168.0.2"
         assert host_vars["rack_name"] == "fake_rack01"
