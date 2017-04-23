@@ -134,6 +134,18 @@ class TestNetboxAsInventory(object):
         netbox.add_host_to_inventory(groups_categories, inventory_dict, host_data)
         assert "fake_host" in inventory_dict["no_group"]
 
+    @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
+        ({"default": ["arbitrary_group_name"]},
+         {"_meta": {"hostvars": {}}},
+         fake_host),
+    ])
+    def test_add_host_to_inventory_with_wrong_group(self, groups_categories, inventory_dict, host_data):
+        """
+        """
+        with pytest.raises(SystemExit) as no_group_error:
+            netbox.add_host_to_inventory(groups_categories, inventory_dict, host_data)
+        assert no_group_error
+
     @pytest.mark.parametrize("host_data, host_vars", [
         (fake_host,
          {"ip": {"ansible_ssh_host": "primary_ip"}, "general": {"rack_name": "rack"}})
