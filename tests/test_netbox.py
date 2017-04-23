@@ -119,8 +119,11 @@ class TestNetboxAsInventory(object):
         ({},
          {"_meta": {"hostvars": {}}},
          fake_host),
+        ({},
+         {"no_group": [], "_meta": {"hostvars": {}}},
+         fake_host)
     ])
-    def test_add_host_to_inventory_with_empty_group(self, groups_categories, inventory_dict, host_data):
+    def test_add_host_to_inventory_with_no_group(self, groups_categories, inventory_dict, host_data):
         """
         """
         netbox_inventory.add_host_to_inventory(groups_categories, inventory_dict, host_data)
