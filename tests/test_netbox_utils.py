@@ -35,7 +35,7 @@ class TestNetboxUtils(object):
         """
         """
         with pytest.raises(SystemExit) as key_not_exists:
-            reduced_path = netbox.get_value_by_path(source_dict, key_path)
+            netbox.get_value_by_path(source_dict, key_path)
         assert key_not_exists
 
     @pytest.mark.parametrize("source_dict, key_path, ignore_key_error", [
@@ -66,5 +66,5 @@ class TestNetboxUtils(object):
         """
         """
         with pytest.raises(SystemExit) as file_not_exists:
-            config_output = netbox.open_yaml_file(yaml_file)
+            netbox.open_yaml_file(yaml_file)
         assert file_not_exists
