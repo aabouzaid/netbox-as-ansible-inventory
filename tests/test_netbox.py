@@ -12,6 +12,7 @@ import json
 test_cfg = commons.test_cfg
 config = commons.config
 netbox_api_output = commons.netbox_api_output
+fake_host = commons.fake_host
 
 
 # Fake args.
@@ -27,63 +28,6 @@ netbox = netbox.NetboxAsInventory(Args, config)
 # Fake Netbox API response.
 def nebox_json_response():
     commons.fake_json_response(netbox.api_url, netbox_api_output, 200)
-
-# Fake single host.
-fake_host = json.loads('''
-  {
-    "id": 1,
-    "name": "fake_host",
-    "display_name": "Fake Host",
-    "device_type": {
-      "id": 1,
-      "manufacturer": {
-        "id": 8,
-        "name": "Fake Manufacturer",
-        "slug": "fake_manufacturer"
-      },
-      "model": "all",
-      "slug": "all"
-    },
-    "device_role": {
-      "id": 8,
-      "name": "Fake Server",
-      "slug": "fake_server"
-    },
-    "tenant": null,
-    "platform": null,
-    "serial": "",
-    "asset_tag": "fake_tag",
-    "rack": {
-      "id": 1,
-      "name": "fake_rack01",
-      "facility_id": null,
-      "display_name": "Fake Rack01"
-    },
-    "position": null,
-    "face": null,
-    "parent_device": null,
-    "status": true,
-    "primary_ip": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.2/32"
-    },
-    "primary_ip4": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.2/32"
-    },
-    "primary_ip6": null,
-    "comments": "",
-    "custom_fields": {
-      "label": "Web",
-      "env": {
-        "id": 1,
-        "value": "Prod"
-      }
-    }
-  }
-''')
 
 
 #
