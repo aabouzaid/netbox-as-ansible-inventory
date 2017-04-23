@@ -124,6 +124,18 @@ class TestNetboxAsInventory(object):
         assert "fake_host" in inventory_dict["fake_rack01"]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
+        ({"arbitrary_category_name": []},
+         {"_meta": {"hostvars": {}}},
+         fake_host),
+    ])
+    def test_add_host_to_inventory_with_wrong_category(self, groups_categories, inventory_dict, host_data):
+        """
+        """
+        with pytest.raises(KeyError) as wrong_category_error:
+            netbox.add_host_to_inventory(groups_categories, inventory_dict, host_data)
+        assert wrong_category_error
+
+    @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
         ({},
          {"_meta": {"hostvars": {}}},
          fake_host),
