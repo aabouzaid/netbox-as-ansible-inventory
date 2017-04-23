@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import netbox
+import commons
 import pytest
 import responses
 import json
@@ -7,16 +8,10 @@ import json
 #
 # Init.
 
-# Paths.
-test_cfg = {
-    "netbox_config": "tests/files/test_netbox.yml",
-    "api_sample": "tests/files/test_api_output.json"
-}
-
-# Get Netbox config and API output.
-config = netbox.open_yaml_file(test_cfg["netbox_config"])
-with open(test_cfg["api_sample"]) as data_file:
-    netbox_api_output = data_file.read()
+# Common vars.
+test_cfg = commons.test_cfg
+config = commons.config
+netbox_api_output = commons.netbox_api_output
 
 
 # Fake args.
@@ -29,11 +24,9 @@ class Args(object):
 netbox = netbox.NetboxAsInventory(Args, config)
 
 
-# Fake API response.
-def fake_json_response():
-    responses.add(responses.GET, netbox.api_url,
-                  body=netbox_api_output, status=200,
-                  content_type='application/json')
+# Fake Netbox API response.
+def nebox_json_response():
+    commons.fake_json_response(netbox.api_url, netbox_api_output, 200)
 
 # Fake single host.
 fake_host = json.loads('''
@@ -102,7 +95,7 @@ class TestNetboxAsInventory(object):
         """
         Test get hosts list from API and make sure it returns a list.
         """
-        fake_json_response()
+        nebox_json_response()
         hosts_list = netbox.get_hosts_list(netbox.api_url)
         assert isinstance(hosts_list, list)
 
@@ -162,7 +155,7 @@ class TestNetboxAsInventory(object):
         """
         Test generateing final Ansible inventory before convert it to JSON.
         """
-        fake_json_response()
+        nebox_json_response()
         ansible_inventory = netbox.generate_inventory()
         assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
         assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
