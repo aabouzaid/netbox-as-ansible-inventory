@@ -48,7 +48,7 @@ class TestNetboxAsInventory(object):
         """
         """
         with pytest.raises(SystemExit) as empty_config_error:
-            netbox_inventory = netbox.NetboxAsInventory(args, config)
+            netbox.NetboxAsInventory(args, config)
         assert empty_config_error
 
     @responses.activate
@@ -66,7 +66,7 @@ class TestNetboxAsInventory(object):
         """
         netbox_json_response()
         with pytest.raises(SystemExit) as none_url_error:
-            hosts_list = netbox_inventory.get_hosts_list(None)
+            netbox_inventory.get_hosts_list(None)
         assert none_url_error
 
     @responses.activate
