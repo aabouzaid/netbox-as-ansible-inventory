@@ -172,11 +172,9 @@ class TestNetboxAsInventory(object):
         assert host_vars["rack_name"] == "fake_rack01"
 
     @pytest.mark.parametrize("inventory_dict, host_name, host_vars", [
-        (
-            {"_meta": {"hostvars": {}}},
-            "fake_host",
-            {"rack_name": "fake_rack01"}
-        )
+        ({"_meta": {"hostvars": {}}},
+         "fake_host",
+         {"rack_name": "fake_rack01"})
     ])
     def test_update_host_meta_vars(self, inventory_dict, host_name, host_vars):
         """
