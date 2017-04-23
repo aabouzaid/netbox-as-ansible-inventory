@@ -34,6 +34,16 @@ def nebox_json_response():
 # Tests.
 class TestNetboxAsInventory(object):
 
+    @pytest.mark.parametrize("args, config", [
+        (Args, {})
+    ])
+    def test_empty_config_dict(self, args, config):
+        """
+        """
+        with pytest.raises(SystemExit) as empty_config_error:
+            netbox_inventory = netbox.NetboxAsInventory(args, config)
+        assert empty_config_error
+
     @responses.activate
     def test_get_hosts_list(self):
         """
