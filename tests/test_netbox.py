@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import netbox
-import commons
+from . import commons
 import pytest
 import responses
 import json
