@@ -123,6 +123,17 @@ class TestNetboxAsInventory(object):
         assert "fake_rack01" in inventory_dict
         assert "fake_host" in inventory_dict["fake_rack01"]
 
+    @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
+        ({},
+         {"_meta": {"hostvars": {}}},
+         fake_host),
+    ])
+    def test_add_host_to_inventory_with_empty_group(self, groups_categories, inventory_dict, host_data):
+        """
+        """
+        netbox.add_host_to_inventory(groups_categories, inventory_dict, host_data)
+        assert "fake_host" in inventory_dict["no_group"]
+
     @pytest.mark.parametrize("host_data, host_vars", [
         (fake_host,
          {"ip": {"ansible_ssh_host": "primary_ip"}, "general": {"rack_name": "rack"}})
