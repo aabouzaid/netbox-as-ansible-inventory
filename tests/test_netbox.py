@@ -53,6 +53,15 @@ class TestNetboxAsInventory(object):
         hosts_list = netbox_inventory.get_hosts_list(netbox_inventory.api_url)
         assert isinstance(hosts_list, list)
 
+    @responses.activate
+    def test_get_hosts_list_none_url_value(self):
+        """
+        """
+        nebox_json_response()
+        with pytest.raises(SystemExit) as none_url_error:
+            hosts_list = netbox_inventory.get_hosts_list(None)
+        assert none_url_error
+
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
         ("fake_server", "fake_group", {})
     ])
