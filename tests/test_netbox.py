@@ -214,4 +214,5 @@ class TestNetboxAsInventory(object):
         """
         netbox.print_inventory_json(inventory_dict)
         function_stdout, function_stderr = capsys.readouterr()
+        assert not function_stderr
         assert json.loads(function_stdout) == inventory_dict
