@@ -58,3 +58,13 @@ class TestNetboxUtils(object):
         config_output = netbox.open_yaml_file(yaml_file)
         assert config_output["netbox"]
         assert config_output["netbox"]["main"]["api_url"]
+
+    @pytest.mark.parametrize("yaml_file", [
+        "tests/files/nonexists.yml"
+    ])
+    def test_open_yaml_file_not_exists(self, yaml_file):
+        """
+        """
+        with pytest.raises(SystemExit) as file_not_exists:
+            config_output = netbox.open_yaml_file(yaml_file)
+        assert file_not_exists
