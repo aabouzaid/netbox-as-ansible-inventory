@@ -52,31 +52,40 @@ class TestNetboxAsInventory(object):
         assert empty_config_error
 
     @responses.activate
-    def test_get_hosts_list(self):
+    @pytest.mark.parametrize("api_url", [
+        netbox_inventory.api_url
+    ])
+    def test_get_hosts_list(self, api_url):
         """
         Test get hosts list from API and make sure it returns a list.
         """
         netbox_json_response()
-        hosts_list = netbox_inventory.get_hosts_list(netbox_inventory.api_url)
+        hosts_list = netbox_inventory.get_hosts_list(api_url)
         assert isinstance(hosts_list, list)
 
     @responses.activate
-    def test_get_hosts_list_none_url_value(self):
+    @pytest.mark.parametrize("api_url", [
+        None
+    ])
+    def test_get_hosts_list_none_url_value(self, api_url):
         """
         """
         netbox_json_response()
         with pytest.raises(SystemExit) as none_url_error:
-            netbox_inventory.get_hosts_list(None)
+            netbox_inventory.get_hosts_list(api_url)
         assert none_url_error
 
     @responses.activate
-    def test_get_hosts_list_single_host(self):
+    @pytest.mark.parametrize("api_url, host_name", [
+        (netbox_inventory_single.api_url, netbox_inventory_single.host)
+    ])
+    def test_get_hosts_list_single_host(self, api_url, host_name):
         """
         """
         netbox_json_response(single_host=True)
         host_data = netbox_inventory_single.get_hosts_list(
-            netbox_inventory_single.api_url,
-            specific_host=netbox_inventory_single.host)
+            api_url,
+            specific_host=host_name)
         assert host_data["name"] == "fake_host"
 
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
@@ -185,8 +194,8 @@ class TestNetboxAsInventory(object):
                 "hostvars": {
                     "fake_host02": {"rack_name": "fake_rack01"},
                     "fake_host01": {"ansible_ssh_host": "192.168.0.2", "rack_name": "fake_rack01"}
-                },
-            },
+                }
+            }
         }
     ])
     def test_print_inventory_json(self, capsys, inventory_dict):
