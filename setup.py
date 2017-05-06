@@ -20,13 +20,14 @@ def open_file(file_name, splitlines=False):
         return file_output
 
 # Get vars from project files.
+version = open_file('VERSION')
 long_description = open_file('README.rst')
 main_requirements = open_file('requirements.txt', splitlines=True)
 tests_requirements = open_file('tests/requirements.txt', splitlines=True)
 
 setup(
     name='ansible-netbox-inventory',
-    version='1.0.0',
+    version=version,
     description='Ansible dynamic inventory script for Netbox',
     long_description=long_description,
     url='https://github.com/AAbouZaid/netbox-as-ansible-inventory',
