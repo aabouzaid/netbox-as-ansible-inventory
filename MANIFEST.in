@@ -1,4 +1,4 @@
-include README.md
+include README.rst
 include requirements.txt
 include netbox.py
 include netbox.yml
