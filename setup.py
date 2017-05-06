@@ -30,8 +30,9 @@ setup(
     author='Ahmed AbouZaid',
     license='GPLv3',
     classifiers=[
-        'Environment :: Console'
-        'Intended Audience :: Devops',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
         'Topic :: Utilities',
         'Topic :: System :: Installation/Setup',
         'Topic :: System :: Systems Administration',
