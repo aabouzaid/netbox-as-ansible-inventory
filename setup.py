@@ -9,17 +9,20 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-here = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file.
-with open(path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
-    long_description = readme_file.read()
+def open_file(file_name, splitlines=False):
+    here = path.abspath(path.dirname(__file__))
+    with open(path.join(here, file_name), encoding='utf-8') as opened_file:
+        file_output = opened_file.read()
+    if splitlines:
+        return file_output.splitlines()
+    else:
+        return file_output
 
-# Get the requirements.
-with open(path.join(here, 'requirements.txt'), encoding='utf-8') as main_requirements_file:
-    main_requirements = main_requirements_file.read().splitlines()
-with open(path.join(here, 'tests/requirements.txt'), encoding='utf-8') as tests_requirements_file:
-    tests_requirements = tests_requirements_file.read().splitlines()
+# Get vars from project files.
+long_description = open_file('README.rst')
+main_requirements = open_file('requirements.txt', splitlines=True)
+tests_requirements = open_file('tests/requirements.txt', splitlines=True)
 
 setup(
     name='ansible-netbox-inventory',
