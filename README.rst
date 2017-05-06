@@ -98,7 +98,7 @@ Options
       --host HOST           Print specific host vars as Ansible dynamic inventory
                             syntax. (default: None)
 
-You can also set config file path through environment variables ``NETBOX_CONFIG_FILE``.
+You can also set config file path through environment variable ``NETBOX_CONFIG_FILE``.
 
 Usage
 -----
