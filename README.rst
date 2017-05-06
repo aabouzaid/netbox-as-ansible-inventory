@@ -89,12 +89,16 @@ Options
     optional arguments:
       -h, --help            show this help message and exit
       -c CONFIG_FILE, --config-file CONFIG_FILE
-                            Path for configuration of the script. (default:
-                            netbox.yml)
+                            Path for script's configuration. Also
+                            "NETBOX_CONFIG_FILE" could be used as env var to set
+                            conf file path. (default: netbox.yml)
+
       --list                Print all hosts with vars as Ansible dynamic inventory
                             syntax. (default: False)
       --host HOST           Print specific host vars as Ansible dynamic inventory
                             syntax. (default: None)
+
+You can also set config file path through environment variables ``NETBOX_CONFIG_FILE``.
 
 Usage
 -----
