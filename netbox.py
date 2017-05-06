@@ -99,7 +99,7 @@ def open_yaml_file(yaml_file):
                 print(yaml_error)
                 sys.exit(1)
     except IOError as io_error:
-        print("Cannot open YAML file.\n%s" % (io_error))
+        print("Cannot open YAML file.\n%s" % io_error)
         sys.exit(1)
     return yaml_file_content
 
