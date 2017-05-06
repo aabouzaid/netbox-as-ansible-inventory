@@ -1,4 +1,7 @@
 include README.rst
+include VERSION
 include requirements.txt
 include netbox.py
 include netbox.yml
+include tests/*.py
+include tests/files/*
