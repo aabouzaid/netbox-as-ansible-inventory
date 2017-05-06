@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 import netbox
-import responses
 import json
+import responses
+from os import path
+
+
+# Get file full path.
+def file_path(file_name):
+    here = path.abspath(path.dirname(__file__))
+    return path.join(here, file_name)
 
 # Paths.
 test_cfg = {
-    "netbox_config": "tests/files/test_netbox.yml",
-    "api_sample": "tests/files/test_api_output.json"
+    "netbox_config": file_path("files/test_netbox.yml"),
+    "api_sample": file_path("files/test_api_output.json")
 }
 
 # Fake single host.

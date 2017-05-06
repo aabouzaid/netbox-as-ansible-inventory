@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import netbox
 import pytest
+from . import commons
 
 
 #
@@ -50,7 +51,7 @@ class TestNetboxUtils(object):
         assert reduced_path is None
 
     @pytest.mark.parametrize("yaml_file", [
-        "tests/files/test_netbox.yml"
+        commons.file_path("files/test_netbox.yml")
     ])
     def test_open_yaml_file(self, yaml_file):
         """
@@ -60,7 +61,7 @@ class TestNetboxUtils(object):
         assert config_output["netbox"]["main"]["api_url"]
 
     @pytest.mark.parametrize("yaml_file", [
-        "tests/files/nonexists.yml"
+        commons.file_path("files/nonexists.yml")
     ])
     def test_open_yaml_file_not_exists(self, yaml_file):
         """

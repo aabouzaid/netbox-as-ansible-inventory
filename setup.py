@@ -24,7 +24,7 @@ def open_file(file_name, splitlines=False):
 version = open_file('VERSION')
 long_description = open_file('README.rst')
 main_requirements = open_file('requirements.txt', splitlines=True)
-tests_requirements = open_file('tests/requirements.txt', splitlines=True)
+tests_requirements = open_file('netbox/tests/requirements.txt', splitlines=True)
 
 setup(
     name='ansible-netbox-inventory',
