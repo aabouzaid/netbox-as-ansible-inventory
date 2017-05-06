@@ -13,11 +13,12 @@ from os import path
 def open_file(file_name, splitlines=False):
     here = path.abspath(path.dirname(__file__))
     with open(path.join(here, file_name), encoding='utf-8') as opened_file:
-        file_output = opened_file.read()
+        file_output = opened_file.read().strip()
+
     if splitlines:
-        return file_output.splitlines()
-    else:
-        return file_output
+        file_output = file_output.splitlines()
+
+    return file_output
 
 # Get vars from project files.
 version = open_file('VERSION')
