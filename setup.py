@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 # Copyright 2017, Ahmed AbouZaid <http://aabouzaid.com/>
-# setup.py file is part Netbox dynamic inventory script.
+# setup.py file is part of Netbox dynamic inventory script.
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
 
 from setuptools import setup, find_packages
@@ -33,6 +33,7 @@ setup(
     long_description=long_description,
     url='https://github.com/AAbouZaid/netbox-as-ansible-inventory',
     author='Ahmed AbouZaid',
+    author_email='@'.join(("ahmed.m", "aabouzaid.com")),  # To avoid spam,
     license='GPLv3',
     classifiers=[
         'Environment :: Console',
