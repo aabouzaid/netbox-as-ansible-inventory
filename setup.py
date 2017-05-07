@@ -5,7 +5,7 @@
 # setup.py file is part of Netbox dynamic inventory script.
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from codecs import open
 from os import path
 
@@ -50,6 +50,10 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     ],
     keywords=['ansible', 'netbox', 'dynamic', 'inventory'],
+    packages=['netbox'],
+    package_data={
+        'netbox': ['netbox.yml'],
+    },
     install_requires=main_requirements,
     extras_require={
         'tests': tests_requirements,
