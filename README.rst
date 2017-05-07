@@ -1,7 +1,7 @@
 Netbox dynamic inventory script
 ===============================
 
-|Build Status| |Codacy Badge| |Code Health| |Coverage Status|
+|PyPI Version| |Build Status| |Codacy Badge| |Code Health| |Coverage Status|
 
 ToC
 ---
@@ -107,11 +107,13 @@ Usage
 
     $ ansible all -i netbox.py -m ping
 
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/ansible-netbox-inventory.svg
+   :target: https://pypi.python.org/pypi/ansible-netbox-inventory
 .. |Build Status| image:: https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory.svg?branch=master
    :target: https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory
 .. |Codacy Badge| image:: https://img.shields.io/codacy/8deda33a029a45a8bc360df4dcbf8660.svg
    :target: https://www.codacy.com/app/AAbouZaid/netbox-as-ansible-inventory
 .. |Code Health| image:: https://landscape.io/github/AAbouZaid/netbox-as-ansible-inventory/master/landscape.svg?style=flat
    :target: https://landscape.io/github/AAbouZaid/netbox-as-ansible-inventory/master
-.. |Coverage Status| image:: https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg?branch=master
-   :target: https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory?branch=master
+.. |Coverage Status| image:: https://coveralls.io/repos/github/AAbouZaid/netbox-as-ansible-inventory/badge.svg
+   :target: https://coveralls.io/github/AAbouZaid/netbox-as-ansible-inventory
