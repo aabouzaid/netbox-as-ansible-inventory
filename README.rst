@@ -51,11 +51,12 @@ If that section is a `default` section you need to put it under
 put it under ``group_by.custom``.
 
 Here is an example how servers will be grouped based on their ``platform``.
+
 ::
 
-group_by:
-    default:
-        - platform
+    group_by:
+       default:
+           - platform
 
 So if you have "Ubuntu" and "CentOS" as platforms in Netbox,
 you will have 2 groups of servers that using that systems.
@@ -73,6 +74,7 @@ There are 3 sections here, first type is ``IP``, second one is
 
 Variables are defined as ``Key: Value``. The key is what will be in
 Ansible and value comes from Netbox.
+
 ::
 
     hosts_vars:
