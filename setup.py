@@ -51,6 +51,6 @@ setup(
     keywords=['ansible', 'netbox', 'inventory'],
     install_requires=main_requirements,
     extras_require={
-        'test': tests_requirements,
+        'tests': tests_requirements,
     },
 )

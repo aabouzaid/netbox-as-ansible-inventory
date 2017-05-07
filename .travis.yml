@@ -4,7 +4,8 @@ python:
   - "3.5"
 cache: pip
 install:
-  - python setup.py install
+  - pip install -e .
+  - pip install -e .[tests]
 script:
   - pep8 -v --ignore=E501 .
   - py.test --cov=netbox
