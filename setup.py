@@ -49,7 +49,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     ],
-    keywords=['ansible', 'netbox', 'inventory'],
+    keywords=['ansible', 'netbox', 'dynamic', 'inventory'],
     install_requires=main_requirements,
     extras_require={
         'tests': tests_requirements,
