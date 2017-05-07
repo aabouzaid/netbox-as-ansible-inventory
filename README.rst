@@ -13,10 +13,11 @@ ToC
 -  `Options <#options>`__
 -  `Usage <#usage>`__
 
+
 Intro
 -----
 
-This script uses NetBox as a dynamic inventory for Ansible.
+This is a Netbox dynamic inventory script for Ansible.
 `Netbox <https://github.com/digitalocean/netbox/>`__ is an IP address
 management (IPAM) and data center infrastructure management (DCIM) tool.
 It's nice, modern, and has good APIs ... so it's a pretty nice option to
@@ -26,36 +27,39 @@ You can group servers as you want and based on what you have in Netbox,
 you can select fields as groups or as vars for hosts. And you can use
 default fields or custom fields.
 
+
 Compatibility
 -------------
 
-This script works with ``netbox >= v1.6``, but most probably it will
+The script works with ``netbox >= v1.6``, but most probably it will
 work with all netbox v1.0 and above.
+
 
 Grouping
 --------
 
-Server could be grouped by any section in Netbox, e.g. you can group
-hosts by "site, "rack", "role", "platform", or any other section in
-Netbox (please remember, right now you need to use the names as in API
-not in UI).
+Servers could be grouped by any section in Netbox.
+e.g. you can group hosts by "site, "rack", "role", "platform",
+or any other section in Netbox.
+**Please remember**: For grouping, API names should be used not UI names.
 
 So if you have a "site" called "US-East", in Ansible you will get a
-group is called "US-East" has all hosts in that site.
+hosts group is called "US-East" has all hosts in that site.
 
-If that section is a default section you need to put it under
-``group_by.default`` if it is a custom section put it under
-``group_by.custom``.
+If that section is a `default` section you need to put it under
+``group_by.default`` if it's a custom section (custom fields), then
+put it under ``group_by.custom``.
 
-Here the servers will be grouped based on ``platform``. So if you have
-"Ubuntu" and "CentOS" as platforms in Netbox, you will have 2 groups of
-servers that using that systems.
-
+Here is an example how servers will be grouped based on their ``platform``.
 ::
 
-    group_by:
-        default:
-            - platform
+group_by:
+    default:
+        - platform
+
+So if you have "Ubuntu" and "CentOS" as platforms in Netbox,
+you will have 2 groups of servers that using that systems.
+
 
 Hosts variables
 ---------------
@@ -69,14 +73,14 @@ There are 3 sections here, first type is ``IP``, second one is
 
 Variables are defined as ``Key: Value``. The key is what will be in
 Ansible and value comes from Netbox.
-
-Here ``primary_ip`` will be used as value for ``ansible_ssh_host``.
-
 ::
 
     hosts_vars:
         ip:
             ansible_ssh_host: primary_ip
+
+Here ``primary_ip`` will be used as value for ``ansible_ssh_host``.
+
 
 Options
 -------
@@ -100,12 +104,14 @@ Options
 
 You can also set config file path through environment variable ``NETBOX_CONFIG_FILE``.
 
+
 Usage
 -----
 
 ::
 
     $ ansible all -i netbox.py -m ping
+
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/ansible-netbox-inventory.svg
    :target: https://pypi.python.org/pypi/ansible-netbox-inventory
