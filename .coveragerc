@@ -1,2 +1,8 @@
 [run]
 omit = netbox/tests/*
+
+[report]
+exclude_lines =
+    if __name__ == .__main__.
+    cli_arguments
+    except ImportError
