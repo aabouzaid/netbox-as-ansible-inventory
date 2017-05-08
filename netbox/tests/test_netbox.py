@@ -175,6 +175,18 @@ class TestNetboxAsInventory(object):
         netbox_inventory.update_host_meta_vars(inventory_dict, host_name, host_vars)
         assert inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
 
+    @pytest.mark.parametrize("inventory_dict, host_name, host_vars", [
+        ({"_meta": {"hostvars": {}}},
+         "fake_host",
+         {"rack_name": "fake_rack01"})
+    ])
+    def test_update_host_meta_vars_single_host(self, inventory_dict, host_name, host_vars):
+        """
+        Test update host vars in inventory dict.
+        """
+        netbox_inventory_single.update_host_meta_vars(inventory_dict, host_name, host_vars)
+        assert inventory_dict["fake_host"]["rack_name"] == "fake_rack01"
+
     @responses.activate
     def test_generate_inventory(self):
         """
