@@ -218,3 +218,20 @@ class TestNetboxAsInventory(object):
         function_stdout, function_stderr = capsys.readouterr()
         assert not function_stderr
         assert json.loads(function_stdout) == inventory_dict
+
+    @pytest.mark.parametrize("inventory_dict", [
+        {
+            "fake_host": {
+                "ansible_ssh_host": "192.168.0.2",
+                "rack_name": "fake_rack01"
+            }
+        }
+    ])
+    def test_print_inventory_json_single_host(self, capsys, inventory_dict):
+        """
+        Test printing final Ansible inventory in JSON format for single host.
+        """
+        netbox_inventory_single.print_inventory_json(inventory_dict)
+        function_stdout, function_stderr = capsys.readouterr()
+        assert not function_stderr
+        assert json.loads(function_stdout) == inventory_dict["fake_host"]
