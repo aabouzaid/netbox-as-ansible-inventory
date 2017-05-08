@@ -1,7 +1,7 @@
 Netbox dynamic inventory script
 ===============================
 
-|PyPI Version| |Build Status| |Codacy Badge| |Code Health| |Coverage Status|
+|PyPI Version| |Python Version| |Build Status| |Codacy Badge| |Code Health| |Coverage Status|
 
 ToC
 ---
@@ -115,6 +115,8 @@ Usage
     $ ansible all -i netbox.py -m ping
 
 
+.. |Python Version| image:: https://img.shields.io/pypi/pyversions/ansible-netbox-inventory.svg
+   :target: https://pypi.python.org/pypi/ansible-netbox-inventory
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/ansible-netbox-inventory.svg
    :target: https://pypi.python.org/pypi/ansible-netbox-inventory
 .. |Build Status| image:: https://travis-ci.org/AAbouZaid/netbox-as-ansible-inventory.svg?branch=master
