@@ -6,13 +6,13 @@
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
 
 from setuptools import setup
-from codecs import open
+from codecs import open as openc
 from os import path
 
 
 def open_file(file_name, splitlines=False):
     here = path.abspath(path.dirname(__file__))
-    with open(path.join(here, file_name), encoding='utf-8') as opened_file:
+    with openc(path.join(here, file_name), encoding='utf-8') as opened_file:
         file_output = opened_file.read().strip()
 
     if splitlines:
