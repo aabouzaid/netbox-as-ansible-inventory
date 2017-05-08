@@ -24,6 +24,8 @@ class Args(object):
 
 # Init Netbox class.
 netbox_inventory = netbox.NetboxAsInventory(Args, config)
+Args.list = False
+netbox_inventory_default_args = netbox.NetboxAsInventory(Args, config)
 Args.host = "fake_host"
 netbox_inventory_single = netbox.NetboxAsInventory(Args, config)
 
@@ -235,3 +237,22 @@ class TestNetboxAsInventory(object):
         function_stdout, function_stderr = capsys.readouterr()
         assert not function_stderr
         assert json.loads(function_stdout) == inventory_dict["fake_host"]
+
+    @pytest.mark.parametrize("inventory_dict", [
+        {
+            "fake_rack01": ["fake_host01"],
+            "_meta": {
+                "hostvars": {
+                    "fake_host01": {"ansible_ssh_host": "192.168.0.2", "rack_name": "fake_rack01"}
+                }
+            }
+        }
+    ])
+    def test_print_inventory_json_no_list_arg(self, capsys, inventory_dict):
+        """
+        Test printing final Ansible inventory in JSON format without --list argument.
+        """
+        netbox_inventory_default_args.print_inventory_json(inventory_dict)
+        function_stdout, function_stderr = capsys.readouterr()
+        assert not function_stderr
+        assert json.loads(function_stdout) == {}
