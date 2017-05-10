@@ -3,6 +3,7 @@ omit = netbox/tests/*
 
 [report]
 exclude_lines =
-    if __name__ == .__main__.
+    main()
     cli_arguments
     except ImportError
+    if __name__ == .__main__.
