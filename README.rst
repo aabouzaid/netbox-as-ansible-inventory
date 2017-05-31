@@ -31,8 +31,8 @@ default fields or custom fields.
 Compatibility
 -------------
 
-The script works with ``netbox >= v1.6``, but most probably it will
-work with all netbox v1.0 and above.
+The script tested with ``netbox = v1.6`` and ``netbox = v2.0.4``,
+but most probably it will work with all netbox v1.0 and above.
 
 
 Grouping
