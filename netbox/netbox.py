@@ -215,9 +215,15 @@ class NetboxAsInventory(object):
 
                 # The groups that will be used to group hosts in the inventory.
                 for group in groups_categories[category]:
+                    if group == "ansible_groups":
+                        group_value = get_value_by_path(data_dict, [group, key_name])
+                        for k in group_value.split(","):
+                            group_value = k.strip()
+                            self.add_host_to_group(server_name, group_value, inventory_dict)
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    group_value = get_value_by_path(data_dict, [group, key_name])
-                    self.add_host_to_group(server_name, group_value, inventory_dict)
+                    else :
+                        group_value = get_value_by_path(data_dict, [group, key_name])
+                        self.add_host_to_group(server_name, group_value, inventory_dict)
 
         # If no groups in "group_by" section, the host will go to catch-all group.
         else:
