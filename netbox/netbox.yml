@@ -3,7 +3,7 @@ netbox:
         api_url: 'http://localhost/api/dcim/devices/'
         # Preference for which `key` to be used when querying netbox for devices
         # (i.e. to use `slug` instead of `name`)
-        identifier: slug
+        identifier: name
 
     # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
