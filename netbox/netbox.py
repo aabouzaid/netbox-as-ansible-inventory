@@ -124,6 +124,7 @@ class NetboxAsInventory(object):
         script_config = script_config_data.get(main_config_key)
         if script_config:
             self.api_url = script_config["main"].get('api_url')
+            self.identifier = script_config["main"].get('identifier')
             self.group_by = script_config.setdefault("group_by", {})
             self.hosts_vars = script_config.setdefault("hosts_vars", {})
         else:
@@ -132,7 +133,7 @@ class NetboxAsInventory(object):
 
         # Get value based on key.
         self.key_map = {
-            "default": "name",
+            "default": self.identifier,
             "general": "name",
             "custom": "value",
             "ip": "address"
