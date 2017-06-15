@@ -37,6 +37,7 @@ def cli_arguments():
                         default=os.getenv("NETBOX_CONFIG_FILE", "netbox.yml"),
                         help="""Path for script's configuration. Also "NETBOX_CONFIG_FILE"
                                 could be used as env var to set conf file path.""")
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 1.3')
     parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.",
                         action="store_true")
     parser.add_argument("--host", help="Print specific host vars as Ansible dynamic inventory syntax.",
