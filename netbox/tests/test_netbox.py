@@ -1,19 +1,199 @@
 #!/usr/bin/env python
 import netbox
-from . import commons
 import pytest
 import responses
 import json
+from os import path
 
 #
 # Init.
+###############################################################################
+
+
+# Get file full path.
+def file_path(file_name):
+    here = path.abspath(path.dirname(__file__))
+    return path.join(here, file_name)
+
+# Paths.
+test_cfg = {
+    "netbox_config": file_path("files/test_netbox.yml"),
+}
+
+# Fake Netbox api output.
+netbox_api_output = json.loads('''
+[
+  {
+    "id": 1,
+    "name": "fake_host01",
+    "display_name": "Fake Host 01",
+    "device_type": {
+      "id": 1,
+      "manufacturer": {
+        "id": 8,
+        "name": "Fake Manufacturer",
+        "slug": "fake_manufacturer"
+      },
+      "model": "all",
+      "slug": "all"
+    },
+    "device_role": {
+      "id": 8,
+      "name": "Fake Server",
+      "slug": "fake_server"
+    },
+    "tenant": null,
+    "platform": null,
+    "serial": "",
+    "asset_tag": "fake_tag",
+    "rack": {
+      "id": 1,
+      "name": "fake_rack01",
+      "facility_id": null,
+      "display_name": "Fake Rack01"
+    },
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip4": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip6": null,
+    "comments": "",
+    "custom_fields": {
+      "label": "Web",
+      "env": {
+        "id": 1,
+        "value": "Prod"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "name": "fake_host02",
+    "display_name": "fake_host02",
+    "device_type": {
+      "id": 1,
+      "manufacturer": {
+        "id": 8,
+        "name": "Super Micro",
+        "slug": "super-micro"
+      },
+      "model": "all",
+      "slug": "all"
+    },
+    "device_role": {
+      "id": 8,
+      "name": "Server",
+      "slug": "server"
+    },
+    "tenant": null,
+    "platform": null,
+    "serial": "",
+    "asset_tag": "xtag",
+    "rack": {
+      "id": 1,
+      "name": "fake_rack01",
+      "facility_id": null,
+      "display_name": "Fake Host 02"
+    },
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": null,
+    "primary_ip4": null,
+    "primary_ip6": null,
+    "comments": "",
+    "custom_fields": {
+      "label": "DB",
+      "env": {
+        "id": 1,
+        "value": "Prod"
+      }
+    }
+  }
+]
+''')
+
+# Fake single host.
+fake_host = json.loads('''
+  {
+    "id": 1,
+    "name": "fake_host",
+    "display_name": "Fake Host",
+    "device_type": {
+      "id": 1,
+      "manufacturer": {
+        "id": 8,
+        "name": "Fake Manufacturer",
+        "slug": "fake_manufacturer"
+      },
+      "model": "all",
+      "slug": "all"
+    },
+    "device_role": {
+      "id": 8,
+      "name": "Fake Server",
+      "slug": "fake_server"
+    },
+    "tenant": null,
+    "platform": null,
+    "serial": "",
+    "asset_tag": "fake_tag",
+    "rack": {
+      "id": 1,
+      "name": "fake_rack01",
+      "facility_id": null,
+      "display_name": "Fake Rack01"
+    },
+    "position": null,
+    "face": null,
+    "parent_device": null,
+    "status": true,
+    "primary_ip": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip4": {
+      "id": 1,
+      "family": 4,
+      "address": "192.168.0.2/32"
+    },
+    "primary_ip6": null,
+    "comments": "",
+    "custom_fields": {
+      "label": "Web",
+      "env": {
+        "id": 1,
+        "value": "Prod"
+      }
+    }
+  }
+''')
+
+# Get Netbox config and API output.
+config = netbox.open_yaml_file(test_cfg["netbox_config"])
 
 # Common vars.
-test_cfg = commons.test_cfg
-config = commons.config
-netbox_api_output = commons.netbox_api_output
-fake_host = commons.fake_host
-fake_host_json = json.dumps(commons.fake_host)
+netbox_api_output_json = json.dumps(netbox_api_output)
+fake_host_json = json.dumps(fake_host)
+
+
+# Fake API response.
+def fake_json_response(url, json_payload, status):
+    responses.add(responses.GET, url,
+                  body=json_payload, status=status,
+                  content_type='application/json')
 
 
 # Fake args.
@@ -35,12 +215,82 @@ def netbox_json_response(single_host=False):
     if single_host:
         json_payload = fake_host_json
     else:
-        json_payload = netbox_api_output
-    commons.fake_json_response(netbox_inventory.api_url, json_payload, 200)
+        json_payload = netbox_api_output_json
+    fake_json_response(netbox_inventory.api_url, json_payload, 200)
 
 
 #
 # Tests.
+###############################################################################
+
+
+# Test Netbox utils functions.
+class TestNetboxUtils(object):
+
+    @pytest.mark.parametrize("source_dict, key_path", [
+        ({"a_key": {"b_key": {"c_key": "c_value"}}},
+         ["a_key", "b_key", "c_key"])
+    ])
+    def test_reduce_path(self, source_dict, key_path):
+        """
+        """
+        reduced_path = netbox.reduce_path(source_dict, key_path)
+        assert reduced_path == "c_value"
+
+    @pytest.mark.parametrize("source_dict, key_path", [
+        ({"a_key": {"b_key": {"c_key": "c_value"}}},
+         ["a_key", "b_key", "c_key"])
+    ])
+    def test_get_value_by_path_key_exists(self, source_dict, key_path):
+        """
+        """
+        reduced_path = netbox.get_value_by_path(source_dict, key_path)
+        assert reduced_path == "c_value"
+
+    @pytest.mark.parametrize("source_dict, key_path", [
+        ({"a_key": {"b_key": {"c_key": "c_value"}}},
+         ["a_key", "b_key", "any"])
+    ])
+    def test_get_value_by_path_key_not_exists(self, source_dict, key_path):
+        """
+        """
+        with pytest.raises(SystemExit) as key_not_exists:
+            netbox.get_value_by_path(source_dict, key_path)
+        assert key_not_exists
+
+    @pytest.mark.parametrize("source_dict, key_path, ignore_key_error", [
+        ({"a_key": {"b_key": {"c_key": "c_value"}}},
+         ["a_key", "b_key", "any"],
+         True)
+    ])
+    def test_get_value_by_path_key_not_exists_ignore_error(self, source_dict, key_path, ignore_key_error):
+        """
+        """
+        reduced_path = netbox.get_value_by_path(source_dict, key_path, ignore_key_error)
+        assert reduced_path is None
+
+    @pytest.mark.parametrize("yaml_file", [
+        file_path("files/test_netbox.yml")
+    ])
+    def test_open_yaml_file(self, yaml_file):
+        """
+        """
+        config_output = netbox.open_yaml_file(yaml_file)
+        assert config_output["netbox"]
+        assert config_output["netbox"]["main"]["api_url"]
+
+    @pytest.mark.parametrize("yaml_file", [
+        file_path("files/nonexists.yml")
+    ])
+    def test_open_yaml_file_not_exists(self, yaml_file):
+        """
+        """
+        with pytest.raises(SystemExit) as file_not_exists:
+            netbox.open_yaml_file(yaml_file)
+        assert file_not_exists
+
+
+# Test NetboxAsInventory class.
 class TestNetboxAsInventory(object):
 
     @pytest.mark.parametrize("args, config", [
