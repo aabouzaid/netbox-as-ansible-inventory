@@ -304,7 +304,8 @@ class TestNetboxUtils(object):
         assert config_output["netbox"]
         assert config_output["netbox"]["main"]["api_url"]
 
-    def teardown_function(function):
+    @staticmethod
+    def teardown_function():
         os.unlink(netbox_config_file.name)
 
     @pytest.mark.parametrize("yaml_file", [
