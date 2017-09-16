@@ -11,6 +11,43 @@ import responses
 # Init.
 ###############################################################################
 
+# Netbox config file.
+netbox_config = '''
+netbox:
+    main:
+        api_url: 'http://localhost/api/dcim/devices/'
+
+    # How servers will be grouped.
+    # If no group specified here, inventory script will return all servers.
+    group_by:
+        # Default section in Netbox.
+        default:
+            - device_role
+            - rack
+            - platform
+        # Custom sections (custom_fields) could be used.
+        #custom:
+        #    - env
+
+    # Use Netbox sections as host variables.
+    hosts_vars:
+        # Sections related to IPs e.g. "primary_ip" or "primary_ip4".
+        ip:
+            ansible_ssh_host: primary_ip
+        # Any other sections.
+        general:
+            rack_name: rack
+        # Custom sections (custom_fields) could be used as vars too.
+        #custom:
+        #    env: env
+'''
+
+# Mock open Netbox config file.
+netbox_config_file = tempfile.NamedTemporaryFile(delete=False, mode='a')
+netbox_config_file.write(netbox_config)
+netbox_config_file.close()
+netbox_config_data = yaml.load(netbox_config)
+
 # Fake Netbox api output.
 netbox_api_output = json.loads('''
 [
@@ -171,43 +208,6 @@ fake_host = json.loads('''
     }
   }
 ''')
-
-# Netbox config file.
-netbox_config = '''
-netbox:
-    main:
-        api_url: 'http://localhost/api/dcim/devices/'
-
-    # How servers will be grouped.
-    # If no group specified here, inventory script will return all servers.
-    group_by:
-        # Default section in Netbox.
-        default:
-            - device_role
-            - rack
-            - platform
-        # Custom sections (custom_fields) could be used.
-        #custom:
-        #    - env
-
-    # Use Netbox sections as host variables.
-    hosts_vars:
-        # Sections related to IPs e.g. "primary_ip" or "primary_ip4".
-        ip:
-            ansible_ssh_host: primary_ip
-        # Any other sections.
-        general:
-            rack_name: rack
-        # Custom sections (custom_fields) could be used as vars too.
-        #custom:
-        #    env: env
-'''
-
-# Mock open Netbox config file.
-netbox_config_file = tempfile.NamedTemporaryFile(delete=False, mode='a')
-netbox_config_file.write(netbox_config)
-netbox_config_file.close()
-netbox_config_data = yaml.load(netbox_config)
 
 # Common vars.
 netbox_api_output_json = json.dumps(netbox_api_output)
