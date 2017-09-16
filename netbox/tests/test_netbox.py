@@ -1,24 +1,15 @@
 #!/usr/bin/env python
+import os
+import json
+import yaml
 import netbox
 import pytest
+import tempfile
 import responses
-import json
-from os import path
 
 #
 # Init.
 ###############################################################################
-
-
-# Get file full path.
-def file_path(file_name):
-    here = path.abspath(path.dirname(__file__))
-    return path.join(here, file_name)
-
-# Paths.
-test_cfg = {
-    "netbox_config": file_path("files/test_netbox.yml"),
-}
 
 # Fake Netbox api output.
 netbox_api_output = json.loads('''
@@ -181,8 +172,42 @@ fake_host = json.loads('''
   }
 ''')
 
-# Get Netbox config and API output.
-config = netbox.open_yaml_file(test_cfg["netbox_config"])
+# Netbox config file.
+netbox_config = '''
+netbox:
+    main:
+        api_url: 'http://localhost/api/dcim/devices/'
+
+    # How servers will be grouped.
+    # If no group specified here, inventory script will return all servers.
+    group_by:
+        # Default section in Netbox.
+        default:
+            - device_role
+            - rack
+            - platform
+        # Custom sections (custom_fields) could be used.
+        #custom:
+        #    - env
+
+    # Use Netbox sections as host variables.
+    hosts_vars:
+        # Sections related to IPs e.g. "primary_ip" or "primary_ip4".
+        ip:
+            ansible_ssh_host: primary_ip
+        # Any other sections.
+        general:
+            rack_name: rack
+        # Custom sections (custom_fields) could be used as vars too.
+        #custom:
+        #    env: env
+'''
+
+# Mock open Netbox config file.
+netbox_config_file = tempfile.NamedTemporaryFile(delete=False, mode='a')
+netbox_config_file.write(netbox_config)
+netbox_config_file.close()
+netbox_config_data = yaml.load(netbox_config)
 
 # Common vars.
 netbox_api_output_json = json.dumps(netbox_api_output)
@@ -198,16 +223,16 @@ def fake_json_response(url, json_payload, status):
 
 # Fake args.
 class Args(object):
-    config_file = test_cfg["netbox_config"]
+    config_file = netbox_config_file.name
     host = None
     list = True
 
 # Init Netbox class.
-netbox_inventory = netbox.NetboxAsInventory(Args, config)
+netbox_inventory = netbox.NetboxAsInventory(Args, netbox_config_data)
 Args.list = False
-netbox_inventory_default_args = netbox.NetboxAsInventory(Args, config)
+netbox_inventory_default_args = netbox.NetboxAsInventory(Args, netbox_config_data)
 Args.host = "fake_host"
-netbox_inventory_single = netbox.NetboxAsInventory(Args, config)
+netbox_inventory_single = netbox.NetboxAsInventory(Args, netbox_config_data)
 
 
 # Fake Netbox API response.
@@ -270,7 +295,7 @@ class TestNetboxUtils(object):
         assert reduced_path is None
 
     @pytest.mark.parametrize("yaml_file", [
-        file_path("files/test_netbox.yml")
+        netbox_config_file.name
     ])
     def test_open_yaml_file(self, yaml_file):
         """
@@ -279,8 +304,11 @@ class TestNetboxUtils(object):
         assert config_output["netbox"]
         assert config_output["netbox"]["main"]["api_url"]
 
+    def teardown_function(function):
+        os.unlink(netbox_config_file.name)
+
     @pytest.mark.parametrize("yaml_file", [
-        file_path("files/nonexists.yml")
+        "nonexists.yml"
     ])
     def test_open_yaml_file_not_exists(self, yaml_file):
         """
@@ -288,6 +316,10 @@ class TestNetboxUtils(object):
         with pytest.raises(SystemExit) as file_not_exists:
             netbox.open_yaml_file(yaml_file)
         assert file_not_exists
+
+#    @classmethod
+#    def teardown_class(cls):
+#        os.unlink(netbox_config_file.name)
 
 
 # Test NetboxAsInventory class.
