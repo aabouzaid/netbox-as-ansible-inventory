@@ -2,10 +2,10 @@
 import os
 import json
 import yaml
-import netbox
 import pytest
 import tempfile
 import responses
+from netbox import netbox
 
 #
 # Init.
