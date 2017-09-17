@@ -46,7 +46,7 @@ netbox:
 netbox_config_file = tempfile.NamedTemporaryFile(delete=False, mode='a')
 netbox_config_file.write(netbox_config)
 netbox_config_file.close()
-netbox_config_data = yaml.load(netbox_config)
+netbox_config_data = yaml.safe_load(netbox_config)
 
 # Fake Netbox api output.
 netbox_api_output = json.loads('''
