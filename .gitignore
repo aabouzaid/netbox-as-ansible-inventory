@@ -1,5 +1,6 @@
-api-sample.json
 *.pyc
 .cache
 .idea
 .coverage
+*.egg-info
+dist
