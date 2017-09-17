@@ -316,10 +316,6 @@ class TestNetboxUtils(object):
         assert config_output["netbox"]
         assert config_output["netbox"]["main"]["api_url"]
 
-    @staticmethod
-    def teardown_function():
-        os.unlink(netbox_config_file.name)
-
     @pytest.mark.parametrize("yaml_file", [
         "nonexists.yml"
     ])
@@ -342,8 +338,9 @@ class TestNetboxUtils(object):
             netbox.open_yaml_file(yaml_file)
         assert invalid_yaml_syntax
 
-    @staticmethod
-    def teardown_function():
+    @classmethod
+    def teardown_class(cls):
+        os.unlink(netbox_config_file.name)
         os.unlink(netbox_config_file_invalid.name)
 
 
