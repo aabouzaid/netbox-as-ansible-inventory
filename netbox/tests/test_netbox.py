@@ -338,9 +338,9 @@ class TestNetboxUtils(object):
         """
         Test open invalid yaml file.
         """
-        with pytest.raises(SystemExit) as yaml_error:
-            config_output = netbox.open_yaml_file(yaml_file)
-        assert yaml_error
+        with pytest.raises(SystemExit) as invalid_yaml_syntax:
+            netbox.open_yaml_file(yaml_file)
+        assert invalid_yaml_syntax
 
     @staticmethod
     def teardown_function():
