@@ -42,11 +42,18 @@ netbox:
         #    env: env
 '''
 
+# Netbox config.
+netbox_config_data = yaml.safe_load(netbox_config)
+
 # Mock open Netbox config file.
 netbox_config_file = tempfile.NamedTemporaryFile(delete=False, mode='a')
 netbox_config_file.write(netbox_config)
 netbox_config_file.close()
-netbox_config_data = yaml.safe_load(netbox_config)
+
+# Invalid yaml file.
+netbox_config_file_invalid = tempfile.NamedTemporaryFile(delete=False, mode='a')
+netbox_config_file_invalid.write("invalid yaml syntax: ][")
+netbox_config_file_invalid.close()
 
 # Fake Netbox api output.
 netbox_api_output = json.loads('''
@@ -324,9 +331,20 @@ class TestNetboxUtils(object):
             netbox.open_yaml_file(yaml_file)
         assert file_not_exists
 
-#    @classmethod
-#    def teardown_class(cls):
-#        os.unlink(netbox_config_file.name)
+    @pytest.mark.parametrize("yaml_file", [
+        netbox_config_file_invalid.name
+    ])
+    def test_open_yaml_file_invalid(self, yaml_file):
+        """
+        Test open invalid yaml file.
+        """
+        with pytest.raises(SystemExit) as yaml_error:
+            config_output = netbox.open_yaml_file(yaml_file)
+        assert yaml_error
+
+    @staticmethod
+    def teardown_function():
+        os.unlink(netbox_config_file_invalid.name)
 
 
 # Test NetboxAsInventory class.
