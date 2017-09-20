@@ -6,8 +6,16 @@ import json
 import yaml
 import pytest
 import tempfile
-import responses
 from netbox import netbox
+from requests.models import Response
+
+# Import Mock.
+try:
+    # Python 3.
+    from unittest.mock import patch, MagicMock
+except ImportError:
+    # Python 2.
+    from mock import patch, MagicMock
 
 #
 # Init.
@@ -164,16 +172,18 @@ netbox_api_output = json.loads('''
 # Fake single host.
 fake_host = netbox_api_output[0]
 
-# Common vars.
-netbox_api_output_json = json.dumps(netbox_api_output)
-fake_host_json = json.dumps(fake_host)
 
+# Fake Netbox API response.
+def netbox_api_response(single_host=False):
+    if single_host:
+        json_payload = fake_host
+    else:
+        json_payload = netbox_api_output
 
-# Fake API response.
-def fake_json_response(url, json_payload, status):
-    responses.add(responses.GET, url,
-                  body=json_payload, status=status,
-                  content_type='application/json')
+    response = Response()
+    response.status_code = 200
+    response.json = MagicMock(return_value=json_payload)
+    return MagicMock(return_value=response)
 
 
 # Fake args.
@@ -188,15 +198,6 @@ Args.list = False
 netbox_inventory_default_args = netbox.NetboxAsInventory(Args, netbox_config_data)
 Args.host = "fake_host"
 netbox_inventory_single = netbox.NetboxAsInventory(Args, netbox_config_data)
-
-
-# Fake Netbox API response.
-def netbox_json_response(single_host=False):
-    if single_host:
-        json_payload = fake_host_json
-    else:
-        json_payload = netbox_api_output_json
-    fake_json_response(netbox_inventory.api_url, json_payload, 200)
 
 
 #
@@ -306,7 +307,6 @@ class TestNetboxAsInventory(object):
             netbox.NetboxAsInventory(args, config)
         assert empty_config_error
 
-    @responses.activate
     @pytest.mark.parametrize("api_url", [
         netbox_inventory.api_url
     ])
@@ -314,11 +314,10 @@ class TestNetboxAsInventory(object):
         """
         Test get hosts list from API and make sure it returns a list.
         """
-        netbox_json_response()
-        hosts_list = netbox_inventory.get_hosts_list(api_url)
-        assert isinstance(hosts_list, list)
+        with patch('requests.get', netbox_api_response()):
+            hosts_list = netbox_inventory.get_hosts_list(api_url)
+            assert isinstance(hosts_list, list)
 
-    @responses.activate
     @pytest.mark.parametrize("api_url", [
         None
     ])
@@ -326,12 +325,11 @@ class TestNetboxAsInventory(object):
         """
         Test if Netbox URL is invalid.
         """
-        netbox_json_response()
-        with pytest.raises(SystemExit) as none_url_error:
-            netbox_inventory.get_hosts_list(api_url)
-        assert none_url_error
+        with patch('requests.get', netbox_api_response()):
+            with pytest.raises(SystemExit) as none_url_error:
+                netbox_inventory.get_hosts_list(api_url)
+            assert none_url_error
 
-    @responses.activate
     @pytest.mark.parametrize("api_url, host_name", [
         (netbox_inventory_single.api_url, netbox_inventory_single.host)
     ])
@@ -339,11 +337,12 @@ class TestNetboxAsInventory(object):
         """
         Test Netbox single host output.
         """
-        netbox_json_response(single_host=True)
-        host_data = netbox_inventory_single.get_hosts_list(
-            api_url,
-            specific_host=host_name)
-        assert host_data["name"] == "fake_host01"
+
+        with patch('requests.get', netbox_api_response(single_host=True)):
+            host_data = netbox_inventory_single.get_hosts_list(
+                api_url,
+                specific_host=host_name)
+            assert host_data["name"] == "fake_host01"
 
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
         ("fake_server", "fake_group", {})
@@ -447,15 +446,14 @@ class TestNetboxAsInventory(object):
         netbox_inventory_single.update_host_meta_vars(inventory_dict, host_name, host_vars)
         assert inventory_dict["fake_host01"]["rack_name"] == "fake_rack01"
 
-    @responses.activate
     def test_generate_inventory(self):
         """
         Test generateing final Ansible inventory before convert it to JSON.
         """
-        netbox_json_response()
-        ansible_inventory = netbox_inventory.generate_inventory()
-        assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
-        assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
+        with patch('requests.get', netbox_api_response()):
+            ansible_inventory = netbox_inventory.generate_inventory()
+            assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
+            assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
 
     @pytest.mark.parametrize("inventory_dict", [
         {
