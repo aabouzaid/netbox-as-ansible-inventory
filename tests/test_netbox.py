@@ -63,7 +63,7 @@ netbox_api_output = json.loads('''
   {
     "id": 1,
     "name": "fake_host01",
-    "display_name": "Fake Host 01",
+    "display_name": "Fake Host",
     "device_type": {
       "id": 1,
       "manufacturer": {
@@ -162,61 +162,7 @@ netbox_api_output = json.loads('''
 ''')
 
 # Fake single host.
-fake_host = json.loads('''
-  {
-    "id": 1,
-    "name": "fake_host",
-    "display_name": "Fake Host",
-    "device_type": {
-      "id": 1,
-      "manufacturer": {
-        "id": 8,
-        "name": "Fake Manufacturer",
-        "slug": "fake_manufacturer"
-      },
-      "model": "all",
-      "slug": "all"
-    },
-    "device_role": {
-      "id": 8,
-      "name": "Fake Server",
-      "slug": "fake_server"
-    },
-    "tenant": null,
-    "platform": null,
-    "serial": "",
-    "asset_tag": "fake_tag",
-    "rack": {
-      "id": 1,
-      "name": "fake_rack01",
-      "facility_id": null,
-      "display_name": "Fake Rack01"
-    },
-    "position": null,
-    "face": null,
-    "parent_device": null,
-    "status": true,
-    "primary_ip": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.2/32"
-    },
-    "primary_ip4": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.2/32"
-    },
-    "primary_ip6": null,
-    "comments": "",
-    "custom_fields": {
-      "label": "Web",
-      "env": {
-        "id": 1,
-        "value": "Prod"
-      }
-    }
-  }
-''')
+fake_host = netbox_api_output[0]
 
 # Common vars.
 netbox_api_output_json = json.dumps(netbox_api_output)
@@ -397,7 +343,7 @@ class TestNetboxAsInventory(object):
         host_data = netbox_inventory_single.get_hosts_list(
             api_url,
             specific_host=host_name)
-        assert host_data["name"] == "fake_host"
+        assert host_data["name"] == "fake_host01"
 
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
         ("fake_server", "fake_group", {})
@@ -421,7 +367,7 @@ class TestNetboxAsInventory(object):
         netbox_inventory.add_host_to_inventory(groups_categories, inventory_dict, host_data)
         assert "hostvars" in inventory_dict["_meta"]
         assert "fake_rack01" in inventory_dict
-        assert "fake_host" in inventory_dict["fake_rack01"]
+        assert "fake_host01" in inventory_dict["fake_rack01"]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
         ({"arbitrary_category_name": []},
@@ -449,7 +395,7 @@ class TestNetboxAsInventory(object):
         Test adding host to inventory with no group.
         """
         netbox_inventory.add_host_to_inventory(groups_categories, inventory_dict, host_data)
-        assert "fake_host" in inventory_dict["no_group"]
+        assert "fake_host01" in inventory_dict["no_group"]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
         ({"default": ["arbitrary_group_name"]},
@@ -479,7 +425,7 @@ class TestNetboxAsInventory(object):
 
     @pytest.mark.parametrize("inventory_dict, host_name, host_vars", [
         ({"_meta": {"hostvars": {}}},
-         "fake_host",
+         "fake_host01",
          {"rack_name": "fake_rack01"})
     ])
     def test_update_host_meta_vars(self, inventory_dict, host_name, host_vars):
@@ -487,11 +433,11 @@ class TestNetboxAsInventory(object):
         Test update host vars in inventory dict.
         """
         netbox_inventory.update_host_meta_vars(inventory_dict, host_name, host_vars)
-        assert inventory_dict["_meta"]["hostvars"]["fake_host"]["rack_name"] == "fake_rack01"
+        assert inventory_dict["_meta"]["hostvars"]["fake_host01"]["rack_name"] == "fake_rack01"
 
     @pytest.mark.parametrize("inventory_dict, host_name, host_vars", [
         ({"_meta": {"hostvars": {}}},
-         "fake_host",
+         "fake_host01",
          {"rack_name": "fake_rack01"})
     ])
     def test_update_host_meta_vars_single_host(self, inventory_dict, host_name, host_vars):
@@ -499,7 +445,7 @@ class TestNetboxAsInventory(object):
         Test update host vars in inventory dict.
         """
         netbox_inventory_single.update_host_meta_vars(inventory_dict, host_name, host_vars)
-        assert inventory_dict["fake_host"]["rack_name"] == "fake_rack01"
+        assert inventory_dict["fake_host01"]["rack_name"] == "fake_rack01"
 
     @responses.activate
     def test_generate_inventory(self):
