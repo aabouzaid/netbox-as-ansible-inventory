@@ -2,11 +2,18 @@
 from __future__ import absolute_import
 
 import os
+import sys
 import json
 import yaml
 import pytest
-from netbox import netbox
 from requests.models import Response
+
+# Import netbox as a module.
+try:
+    from netbox import netbox
+except ImportError:
+    sys.path.append("contrib/inventory/")
+    import netbox
 
 # Import Mock.
 try:
