@@ -1,5 +1,4 @@
 pytest
 pytest-cov
 coveralls
-responses
 pep8
