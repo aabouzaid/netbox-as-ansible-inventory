@@ -9,6 +9,6 @@ install:
   - pip install -e .[tests]
 script:
   - pep8 -v --ignore=E501 .
-  - py.test --cov=netbox
+  - python setup.py test -a "--cov=netbox"
 after_success:
   coveralls

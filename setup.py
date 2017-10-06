@@ -6,8 +6,24 @@
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
 
 from setuptools import setup
+from setuptools.command.test import test as TestCommand
 from codecs import open as openc
 from os import path
+import sys
+
+
+# Run tests command.
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
 
 def open_file(file_name, splitlines=False):
@@ -58,5 +74,8 @@ setup(
     install_requires=main_requirements,
     extras_require={
         'tests': tests_requirements,
+    },
+    cmdclass={
+        'test': PyTest,
     },
 )
