@@ -94,7 +94,7 @@ class Requirements(Command):
     def run(self):
         import pip
 
-        # Upload package to PyPI.
+        # Install requirements via pip.
         pip.main(['install', '.'])
         if self.tests_requirement:
             pip.main(['install', '.[tests]'])
@@ -106,7 +106,7 @@ setup(
     long_description=long_description,
     url='https://github.com/AAbouZaid/netbox-as-ansible-inventory',
     author='Ahmed AbouZaid',
-    author_email='@'.join(("ahmed.m", "aabouzaid.com")),  # To avoid spam,
+    author_email='@'.join(("ahmed.m", "aabouzaid.com")),  # To avoid spam.
     license='GPLv3',
     classifiers=[
         'Environment :: Console',
