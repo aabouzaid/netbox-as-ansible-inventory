@@ -5,8 +5,9 @@
 # setup.py file is part of Netbox dynamic inventory script.
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
 
-from setuptools import setup, Command
+from setuptools.command.install import install as InstallCommand
 from setuptools.command.test import test as TestCommand
+from setuptools import setup, Command
 from codecs import open as openc
 from os import path
 import subprocess
@@ -31,7 +32,7 @@ tests_requirements = open_file('tests/requirements.txt', splitlines=True)
 
 
 class PyTest(TestCommand):
-    """Run tests."""
+    """ Run tests. """
 
     user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
 
@@ -46,7 +47,7 @@ class PyTest(TestCommand):
 
 
 class Release(Command):
-    """Tag, push, and upload to PyPI."""
+    """ Tag, push, and upload to PyPI. """
 
     user_options = []
 
@@ -78,6 +79,25 @@ class Release(Command):
         print ' '.join(cmd)
         subprocess.check_call(cmd)
 
+
+class Requirements(Command):
+    """ Install requirements. """
+
+    user_options = [('tests-requirement', 't', "Install requirements for unit test.")]
+
+    def initialize_options(self):
+        self.tests_requirement = False
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import pip
+
+        # Upload package to PyPI.
+        pip.main(['install', '.'])
+        if self.tests_requirement:
+            pip.main(['install', '.[tests]'])
 
 setup(
     name='ansible-netbox-inventory',
@@ -115,5 +135,6 @@ setup(
     cmdclass={
         'test': PyTest,
         'release': Release,
+        'requirements': Requirements,
     },
 )
