@@ -61,22 +61,22 @@ class Release(Command):
         # Create Git tag.
         tag_name = 'v%s' % version
         cmd = ['git', 'tag', '-a', tag_name, '-m', 'version %s' % version]
-        print ' '.join(cmd)
+        print(' '.join(cmd))
         subprocess.check_call(cmd)
 
         # Push Git tag to origin remote.
         cmd = ['git', 'push', 'origin', tag_name]
-        print ' '.join(cmd)
+        print(' '.join(cmd))
         subprocess.check_call(cmd)
 
         # Push branch to origin remote.
         cmd = ['git', 'push', 'origin', 'master']
-        print ' '.join(cmd)
+        print(' '.join(cmd))
         subprocess.check_call(cmd)
 
         # Upload package to PyPI.
         cmd = ['python', 'setup.py', 'sdist', 'upload']
-        print ' '.join(cmd)
+        print(' '.join(cmd))
         subprocess.check_call(cmd)
 
 
