@@ -117,14 +117,10 @@ class NetboxAsInventory(object):
         self.host = script_args.host
 
         # Script configuration.
-        main_config_key = "netbox"
-        script_config = script_config_data.get(main_config_key)
-        if script_config:
-            self.api_url = script_config["main"].get('api_url')
-            self.group_by = script_config.setdefault("group_by", {})
-            self.hosts_vars = script_config.setdefault("hosts_vars", {})
-        else:
-            sys.exit("The key '%s' is not found in config file." % main_config_key)
+        self.script_config = script_config_data
+        self.api_url = self._config(["main", "api_url"], '')
+        self.group_by = self._config(["group_by"], {})
+        self.hosts_vars = self._config(["hosts_vars"], {})
 
         # Get value based on key.
         self.key_map = {
@@ -133,6 +129,30 @@ class NetboxAsInventory(object):
             "custom": "value",
             "ip": "address"
         }
+
+    def _config(self, key_path, key_default):
+        """Get value from config var.
+
+        Args:
+            key_path: A list has the path of the key.
+            key_default: Default value if the key is not found.
+
+        Returns:
+            Key value from config file.
+        """
+        config = self.script_config.get("netbox")
+        value = get_value_by_path(config, key_path, ignore_key_error=True)
+
+        if value:
+            key_value = value
+
+        elif isinstance(value, type(key_default)):
+            key_value = key_default
+
+        else:
+            sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
+
+        return key_value
 
     @staticmethod
     def get_hosts_list(api_url, specific_host=None):
