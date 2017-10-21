@@ -5,7 +5,6 @@
 # setup.py file is part of Netbox dynamic inventory script.
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
 
-from setuptools.command.install import install as InstallCommand
 from setuptools.command.test import test as TestCommand
 from setuptools import setup, Command
 from codecs import open as openc
