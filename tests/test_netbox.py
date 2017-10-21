@@ -215,22 +215,11 @@ class TestNetboxUtils(object):
         ({"a_key": {"b_key": {"c_key": "c_value"}}},
          ["a_key", "b_key", "c_key"])
     ])
-    def test_reduce_path(self, source_dict, key_path):
-        """
-        Test reduce_path function.
-        """
-        reduced_path = netbox.reduce_path(source_dict, key_path)
-        assert reduced_path == "c_value"
-
-    @pytest.mark.parametrize("source_dict, key_path", [
-        ({"a_key": {"b_key": {"c_key": "c_value"}}},
-         ["a_key", "b_key", "c_key"])
-    ])
     def test_get_value_by_path_key_exists(self, source_dict, key_path):
         """
         Test get value by path with exists key.
         """
-        reduced_path = netbox.get_value_by_path(source_dict, key_path)
+        reduced_path = netbox_inventory._get_value_by_path(source_dict, key_path)
         assert reduced_path == "c_value"
 
     @pytest.mark.parametrize("source_dict, key_path", [
@@ -242,7 +231,7 @@ class TestNetboxUtils(object):
         Test get value by path with non-exists key.
         """
         with pytest.raises(SystemExit) as key_not_exists:
-            netbox.get_value_by_path(source_dict, key_path)
+            netbox_inventory._get_value_by_path(source_dict, key_path)
         assert key_not_exists
 
     @pytest.mark.parametrize("source_dict, key_path, ignore_key_error", [
@@ -254,8 +243,22 @@ class TestNetboxUtils(object):
         """
         Test get value by path with exists key and not ignore error.
         """
-        reduced_path = netbox.get_value_by_path(source_dict, key_path, ignore_key_error)
+        reduced_path = netbox_inventory._get_value_by_path(
+            source_dict, key_path, ignore_key_error=ignore_key_error)
         assert reduced_path is None
+
+    @pytest.mark.parametrize("source_dict, key_path, default", [
+        ({"a_key": {"b_key": {"c_key": "c_value"}}},
+         ["a_key", "b_key", "any"],
+         "default_value")
+    ])
+    def test_get_value_by_path_key_not_exists_with_default_value(self, source_dict, key_path, default):
+        """
+        Test get value by path with exists key and not ignore error.
+        """
+        reduced_path = netbox_inventory._get_value_by_path(
+            source_dict, key_path, default=default)
+        assert reduced_path is "default_value"
 
     @pytest.mark.parametrize("yaml_file", [
         "netbox.yml"
