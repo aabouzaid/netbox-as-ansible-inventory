@@ -105,17 +105,19 @@ class NetboxAsInventory(object):
         Args:
             source_dict: The dict that we look into.
             key_path: A list has the path of key. e.g. [parent_dict, child_dict, key_name].
-            ignore_key_error: Ignore KeyError if the key not found in provided path.
-            default: Set default value if the key not found in provided path.
+            ignore_key_error: Ignore KeyError if the key is not found in provided path.
+            default: Set default value if the key is not found in provided path.
 
         Returns:
-            If key found in provided path, it will be returned.
+            If key is found in provided path, it will be returned.
             If ignore_key_error is True, None will be returned.
-            If default is defined and key not is found, default will be returned.
+            If default is defined and key is not found, default will be returned.
         """
 
-        key_output = ""
+        key_value = ""
         try:
+            # Reduce key path, where it get value value from nested dict.
+            # a replacement for buildin reduce function.
             for key in key_path:
                 if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
                     source_dict = source_dict.get(key)
@@ -123,18 +125,17 @@ class NetboxAsInventory(object):
                     self._get_value_by_path(source_dict, key_path,
                                             ignore_key_error=ignore_key_error, default=default)
                 else:
-                    key_output = source_dict[key]
+                    key_value = source_dict[key]
 
+        # How to set the key value, if the key was not found.
         except KeyError as key_name:
             if default:
-                key_output = default
-
+                key_value = default
             elif not default and ignore_key_error:
-                key_output = None
-
-            elif not key_output and not ignore_key_error:
+                key_value = None
+            elif not key_value and not ignore_key_error:
                 sys.exit("The key %s is not found. Please remember, Python is case sensitive." % key_name)
-        return key_output
+        return key_value
 
     def _config(self, key_path, default=""):
         """Get value from config var.
@@ -144,7 +145,7 @@ class NetboxAsInventory(object):
             default: Default value if the key is not found.
 
         Returns:
-            Key value from config file.
+            The value of the key from config file or the default value.
         """
         config = self.script_config.setdefault("netbox", {})
         value = self._get_value_by_path(config, key_path, ignore_key_error=True, default=default)
