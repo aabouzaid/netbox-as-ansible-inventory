@@ -19,7 +19,11 @@ import os
 import sys
 import yaml
 import argparse
-import requests
+
+try:
+    import requests
+except:
+    sys.exit('requests package is required for this inventory script.')
 
 try:
     import json
@@ -152,7 +156,6 @@ class NetboxAsInventory(object):
 
         if value:
             key_value = value
-
         else:
             sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
 
