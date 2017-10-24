@@ -10,7 +10,7 @@ import argparse
 
 try:
     import requests
-except:
+except ImportError:
     sys.exit('requests package is required for this inventory script.')
 
 try:
