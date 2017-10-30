@@ -1,25 +1,17 @@
 #!/usr/bin/env python
 
-# (c) 2017, Ahmed AbouZaid <http://aabouzaid.com/>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright: (c) 2017, Ahmed AbouZaid <http://aabouzaid.com/>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import os
 import sys
 import yaml
 import argparse
-import requests
+
+try:
+    import requests
+except ImportError:
+    sys.exit('requests package is required for this inventory script.')
 
 try:
     import json
@@ -116,7 +108,7 @@ class NetboxAsInventory(object):
 
         key_value = ""
         try:
-            # Reduce key path, where it get value value from nested dict.
+            # Reduce key path, where it get value from nested dict.
             # a replacement for buildin reduce function.
             for key in key_path:
                 if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
@@ -152,7 +144,6 @@ class NetboxAsInventory(object):
 
         if value:
             key_value = value
-
         else:
             sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
 
@@ -293,7 +284,7 @@ class NetboxAsInventory(object):
 
                     if var_value:
                         # Remove CIDR from IP address.
-                        if host_vars.get("ip") and var_data in host_vars["ip"].values():
+                        if "ip" in host_vars and var_data in host_vars["ip"].values():
                             var_value = var_value.split("/")[0]
                         # Add var to host dict.
                         host_vars_dict.update({var_name: var_value})
@@ -328,7 +319,7 @@ class NetboxAsInventory(object):
 
         inventory_dict = dict()
         netbox_hosts_list = self.get_hosts_list(self.api_url, self.host)
-        if isinstance(netbox_hosts_list, dict) and netbox_hosts_list.get("results"):
+        if isinstance(netbox_hosts_list, dict) and "results" in netbox_hosts_list:
             netbox_hosts_list = netbox_hosts_list["results"]
 
         if netbox_hosts_list:
