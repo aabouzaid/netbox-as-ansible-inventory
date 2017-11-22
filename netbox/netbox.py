@@ -155,7 +155,7 @@ class NetboxAsInventory(object):
                 key_value = ""
             else:
                 sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
-        
+
         return key_value
 
     @staticmethod
@@ -173,7 +173,7 @@ class NetboxAsInventory(object):
             api_url_headers = {'Authorization': "Token %s" % api_token}
         else:
             api_url_headers = {}
-        
+
         if specific_host:
             api_url_params = {"name": specific_host}
         else:
