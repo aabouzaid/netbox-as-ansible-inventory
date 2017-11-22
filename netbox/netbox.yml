@@ -1,6 +1,7 @@
 netbox:
     main:
         api_url: 'http://localhost/api/dcim/devices/'
+        #api_token: ''
 
     # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
