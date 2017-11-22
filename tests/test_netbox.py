@@ -310,12 +310,23 @@ class TestNetboxAsInventory(object):
             netbox.NetboxAsInventory(args, config)
         assert empty_config_error
 
+    @pytest.mark.parametrize("api_url", [
+        (netbox_inventory.api_url)
+    ])
+    def test_get_hosts_list(self, api_url):
+        """
+        Test get hosts list from API without token and make sure it returns a list.
+        """
+        with patch('requests.get', netbox_api_all_hosts):
+            hosts_list = netbox_inventory.get_hosts_list(api_url)
+            assert isinstance(hosts_list, list)
+
     @pytest.mark.parametrize("api_url, api_token", [
         (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
     def test_get_hosts_list(self, api_url, api_token):
         """
-        Test get hosts list from API without token and make sure it returns a list.
+        Test get hosts list from API with token and make sure it returns a list.
         """
         with patch('requests.get', netbox_api_all_hosts):
             hosts_list = netbox_inventory.get_hosts_list(api_url, api_token)
