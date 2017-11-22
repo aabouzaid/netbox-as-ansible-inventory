@@ -324,7 +324,7 @@ class TestNetboxAsInventory(object):
     @pytest.mark.parametrize("api_url, api_token", [
         (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
-    def test_get_hosts_list(self, api_url, api_token):
+    def test_get_hosts_list_token(self, api_url, api_token):
         """
         Test get hosts list from API with token and make sure it returns a list.
         """
