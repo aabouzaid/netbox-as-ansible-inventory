@@ -156,7 +156,6 @@ class NetboxAsInventory(object):
             else:
                 sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
         
-
         return key_value
 
     @staticmethod
