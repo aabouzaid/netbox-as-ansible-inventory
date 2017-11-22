@@ -34,6 +34,7 @@ netbox_config = '''
 netbox:
     main:
         api_url: 'http://localhost/api/dcim/devices/'
+        api_token: '1234567890987654321234567890987654321'
 
     # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
@@ -309,33 +310,33 @@ class TestNetboxAsInventory(object):
             netbox.NetboxAsInventory(args, config)
         assert empty_config_error
 
-    @pytest.mark.parametrize("api_url", [
-        netbox_inventory.api_url
+    @pytest.mark.parametrize("api_url, api_token", [
+        (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
-    def test_get_hosts_list(self, api_url):
+    def test_get_hosts_list(self, api_url, api_token):
         """
         Test get hosts list from API and make sure it returns a list.
         """
         with patch('requests.get', netbox_api_all_hosts):
-            hosts_list = netbox_inventory.get_hosts_list(api_url)
+            hosts_list = netbox_inventory.get_hosts_list(api_url, api_token)
             assert isinstance(hosts_list, list)
 
-    @pytest.mark.parametrize("api_url", [
-        None
+    @pytest.mark.parametrize("api_url, api_token", [
+        (None, None)
     ])
-    def test_get_hosts_list_none_url_value(self, api_url):
+    def test_get_hosts_list_none_url_value(self, api_url, api_token):
         """
         Test if Netbox URL is invalid.
         """
         with patch('requests.get', netbox_api_all_hosts):
             with pytest.raises(SystemExit) as none_url_error:
-                netbox_inventory.get_hosts_list(api_url)
+                netbox_inventory.get_hosts_list(api_url, api_token)
             assert none_url_error
 
-    @pytest.mark.parametrize("api_url, host_name", [
-        (netbox_inventory_single.api_url, netbox_inventory_single.host)
+    @pytest.mark.parametrize("api_url, api_token, host_name", [
+        (netbox_inventory_single.api_url, netbox_inventory_single.api_token, netbox_inventory_single.host)
     ])
-    def test_get_hosts_list_single_host(self, api_url, host_name):
+    def test_get_hosts_list_single_host(self, api_url, api_token, host_name):
         """
         Test Netbox single host output.
         """
@@ -343,6 +344,7 @@ class TestNetboxAsInventory(object):
         with patch('requests.get', netbox_api_single_host):
             host_data = netbox_inventory_single.get_hosts_list(
                 api_url,
+                api_token,
                 specific_host=host_name)
             assert host_data["name"] == "fake_host01"
 
