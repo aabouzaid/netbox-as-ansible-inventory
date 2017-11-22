@@ -79,7 +79,7 @@ class NetboxAsInventory(object):
         # Script configuration.
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
-        self.api_token = self._config(["main", "api_token"], optional=True)
+        self.api_token = self._config(["main", "api_token"], ignore_key_error=True)
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
@@ -133,33 +133,24 @@ class NetboxAsInventory(object):
                 sys.exit(error_message % key_name)
         return key_value
 
-    def _config(self, key_path, default="", optional=False):
+    def _config(self, key_path, default="", ignore_key_error=False):
         """Get value from config var.
 
         Args:
             key_path: A list has the path of the key.
             default: Default value if the key is not found.
-            optional: Whether key is required to be found. Default is NOT optional.
 
         Returns:
-            The value of the key from config file, the default value or an empty string if no key found and optional=True
+            The value of the key from config file or the default value
         """
         error_message = "The key %s is not found in config file."
         config = self.script_config.setdefault("netbox", {})
-        value = self._get_value_by_path(config, key_path, ignore_key_error=True, default=default)
-
-        if value:
-            key_value = value
-        else:
-            if optional:
-                key_value = ""
-            else:
-                sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
+        key_value = self._get_value_by_path(config, key_path, ignore_key_error=ignore_key_error, default=default)
 
         return key_value
 
     @staticmethod
-    def get_hosts_list(api_url, api_token, specific_host=None):
+    def get_hosts_list(api_url, api_token=None, specific_host=None):
         """Retrieves hosts list from netbox API.
 
         Returns:
