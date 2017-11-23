@@ -76,10 +76,14 @@ class NetboxAsInventory(object):
         self.list = script_args.list
         self.host = script_args.host
 
+        # Exit if config is empty.
+        if not script_config_data:
+            sys.exit("Config file is empty.")
+
         # Script configuration.
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
-        self.api_token = self._config(["main", "api_token"], ignore_key_error=True)
+        self.api_token = self._config(["main", "api_token"], default="")
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
@@ -133,7 +137,7 @@ class NetboxAsInventory(object):
                 sys.exit(error_message % key_name)
         return key_value
 
-    def _config(self, key_path, default="", ignore_key_error=False):
+    def _config(self, key_path, default=""):
         """Get value from config var.
 
         Args:
@@ -141,11 +145,11 @@ class NetboxAsInventory(object):
             default: Default value if the key is not found.
 
         Returns:
-            The value of the key from config file or the default value
+            The value of the key from config file or the default value.
         """
         error_message = "The key %s is not found in config file."
         config = self.script_config.setdefault("netbox", {})
-        key_value = self._get_value_by_path(config, key_path, ignore_key_error=ignore_key_error, default=default)
+        key_value = self._get_value_by_path(config, key_path, ignore_key_error=True, default=default)
 
         return key_value
 
