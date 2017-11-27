@@ -76,14 +76,10 @@ class NetboxAsInventory(object):
         self.list = script_args.list
         self.host = script_args.host
 
-        # Exit if config is empty.
-        if not script_config_data:
-            sys.exit("Config file is empty.")
-
         # Script configuration.
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
-        self.api_token = self._config(["main", "api_token"], default="")
+        self.api_token = self._config(["main", "api_token"], default="", optional=True)
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
@@ -96,7 +92,7 @@ class NetboxAsInventory(object):
         }
 
     def _get_value_by_path(self, source_dict, key_path,
-                           ignore_key_error=False, default=""):
+                           ignore_key_error=False, default="", error_message=""):
         """Get key value from nested dict by path.
 
         Args:
@@ -112,6 +108,9 @@ class NetboxAsInventory(object):
         """
 
         key_value = ""
+        if not error_message:
+            error_message = "The key %s is not found. Please remember, Python is case sensitive."
+
         try:
             # Reduce key path, where it get value from nested dict.
             # a replacement for buildin reduce function.
@@ -119,8 +118,8 @@ class NetboxAsInventory(object):
                 if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
                     source_dict = source_dict.get(key)
                     key_path = key_path[1:]
-                    self._get_value_by_path(source_dict, key_path,
-                                            ignore_key_error=ignore_key_error, default=default)
+                    self._get_value_by_path(source_dict, key_path, ignore_key_error=ignore_key_error,
+                                            default=default, error_message=error_message)
                 else:
                     key_value = source_dict[key]
 
@@ -131,10 +130,10 @@ class NetboxAsInventory(object):
             elif not default and ignore_key_error:
                 key_value = None
             elif not key_value and not ignore_key_error:
-                sys.exit("The key %s is not found. Please remember, Python is case sensitive." % key_name)
+                sys.exit(error_message % key_name)
         return key_value
 
-    def _config(self, key_path, default=""):
+    def _config(self, key_path, default="", optional=False):
         """Get value from config var.
 
         Args:
@@ -144,8 +143,10 @@ class NetboxAsInventory(object):
         Returns:
             The value of the key from config file or the default value.
         """
+        error_message = "The key %s is not found in config file."
         config = self.script_config.setdefault("netbox", {})
-        key_value = self._get_value_by_path(config, key_path, ignore_key_error=True, default=default)
+        key_value = self._get_value_by_path(config, key_path, ignore_key_error=optional,
+                                            default=default, error_message=error_message)
 
         return key_value
 
