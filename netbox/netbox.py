@@ -148,7 +148,7 @@ class NetboxAsInventory(object):
         script_config_data: Content of its config which comes from YAML file.
     """
 
-    def __init__(self, config_data):
+    def __init__(self, config_data, json_output=False):
         # Script arguments.
         self.config = config_data
 
@@ -159,6 +159,11 @@ class NetboxAsInventory(object):
             "custom": "value",
             "ip": "address"
         }
+
+        # Print output.
+        if json_output:
+            ansible_inventory = self.generate_inventory()
+            self.print_inventory_json(ansible_inventory)
 
     @staticmethod
     def get_hosts_list(api_url, specific_host=None):
@@ -367,9 +372,7 @@ def main():
     config = NetboxAsInventoryConfig()
 
     # Netbox vars.
-    netbox = NetboxAsInventory(config)
-    ansible_inventory = netbox.generate_inventory()
-    netbox.print_inventory_json(ansible_inventory)
+    NetboxAsInventory(config, json_output=True)
 
 
 # Run main.
