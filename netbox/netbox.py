@@ -19,47 +19,125 @@ except ImportError:
     import simplejson as json
 
 
-# Script.
-def cli_arguments():
-    """Script cli arguments.
-    By default Ansible calls "--list" as argument.
-    """
-
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-c", "--config-file",
-                        default=os.getenv("NETBOX_CONFIG_FILE", "netbox.yml"),
-                        help="""Path for script's configuration. Also "NETBOX_CONFIG_FILE"
-                                could be used as env var to set conf file path.""")
-    parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.",
-                        action="store_true")
-    parser.add_argument("--host", help="Print specific host vars as Ansible dynamic inventory syntax.",
-                        action="store")
-    arguments = parser.parse_args()
-    return arguments
-
-
-# Utils.
-def open_yaml_file(yaml_file):
-    """Open YAML file.
+def _get_value_by_path(source_dict, key_path,
+                       ignore_key_error=False, default=""):
+    """Get key value from nested dict by path.
 
     Args:
-        yaml_file: Relative or absolute path to YAML file.
+        source_dict: The dict that we look into.
+        key_path: A list has the path of key. e.g. [parent_dict, child_dict, key_name].
+        ignore_key_error: Ignore KeyError if the key is not found in provided path.
+        default: Set default value if the key is not found in provided path.
 
     Returns:
-        Content of YAML the file.
+        If key is found in provided path, it will be returned.
+        If ignore_key_error is True, None will be returned.
+        If default is defined and key is not found, default will be returned.
     """
 
-    # Load content of YAML file.
+    key_value = ""
     try:
-        with open(yaml_file, 'r') as config_yaml_file:
-            try:
-                yaml_file_content = yaml.safe_load(config_yaml_file)
-            except yaml.YAMLError as yaml_error:
-                sys.exit(yaml_error)
-    except IOError as io_error:
-        sys.exit("Cannot open YAML file.\n%s" % io_error)
-    return yaml_file_content
+        # Reduce key path, where it get value from nested dict.
+        # a replacement for buildin reduce function.
+        for key in key_path:
+            if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
+                source_dict = source_dict.get(key)
+                key_path = key_path[1:]
+                _get_value_by_path(source_dict, key_path,
+                                   ignore_key_error=ignore_key_error, default=default)
+            else:
+                key_value = source_dict[key]
 
+    # How to set the key value, if the key was not found.
+    except KeyError as key_name:
+        if default:
+            key_value = default
+        elif not default and ignore_key_error:
+            key_value = None
+        elif not key_value and not ignore_key_error:
+            sys.exit("The key %s is not found. Please remember, Python is case sensitive." % key_name)
+    return key_value
+
+
+class NetboxAsInventoryConfig(object):
+
+    def __init__(self):
+        self.args = self.cli_arguments()
+        config = self.open_yaml_file(self.args.config_file)
+        self.__dict__ = self.build(config)
+
+    @staticmethod
+    def cli_arguments():
+        """Script cli arguments.
+        By default Ansible calls "--list" as argument.
+        """
+
+        parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument("-c", "--config-file",
+                            default=os.getenv("NETBOX_CONFIG_FILE", "netbox.yml"),
+                            help="""Path for script's configuration. Also "NETBOX_CONFIG_FILE"
+                                    could be used as env var to set conf file path.""")
+        parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.",
+                            action="store_true")
+        parser.add_argument("--host", help="Print specific host vars as Ansible dynamic inventory syntax.",
+                            action="store")
+        arguments = parser.parse_args()
+        return arguments
+
+    @staticmethod
+    def open_yaml_file(yaml_file):
+        """Open YAML file.
+
+        Args:
+            yaml_file: Relative or absolute path to YAML file.
+
+        Returns:
+            Content of YAML the file.
+        """
+
+        # Load content of YAML file.
+        try:
+            with open(yaml_file, 'r') as config_yaml_file:
+                try:
+                    yaml_file_content = yaml.safe_load(config_yaml_file)
+                except yaml.YAMLError as yaml_error:
+                    sys.exit(yaml_error)
+        except IOError as io_error:
+            sys.exit("Cannot open YAML file.\n%s" % io_error)
+        return yaml_file_content
+
+    def set_defaults(self, config, defaults=None):
+        """Fill config defaults.
+        """
+        for key in defaults:
+            if isinstance(defaults[key], dict):
+                self.set_defaults(config.setdefault(key, {}), defaults[key])
+            else:
+                config.setdefault(key, defaults[key])
+        return config
+
+    def build(self, config_data):
+        """Build Netbox config.
+        """
+
+        if 'netbox' not in config_data:
+            sys.exit("The key 'netbox' is not found in config file.")
+        else:
+            netbox_config = config_data['netbox']
+
+        defaults = {
+            'args': self.args.__dict__,
+            'main': {
+                'api_url': '',
+                'api_token': '',
+            },
+            'group_by': {},
+            'hosts_vars': {},
+        }
+
+        config = self.set_defaults(netbox_config, defaults)
+        return config
+      
 
 class NetboxAsInventory(object):
     """Netbox as a dynamic inventory for Ansible.
@@ -70,17 +148,9 @@ class NetboxAsInventory(object):
         script_config_data: Content of its config which comes from YAML file.
     """
 
-    def __init__(self, script_args, script_config_data):
+    def __init__(self, config_data):
         # Script arguments.
-        self.config_file = script_args.config_file
-        self.list = script_args.list
-        self.host = script_args.host
-
-        # Script configuration.
-        self.script_config = script_config_data
-        self.api_url = self._config(["main", "api_url"])
-        self.group_by = self._config(["group_by"], default={})
-        self.hosts_vars = self._config(["hosts_vars"], default={})
+        self.config = config_data
 
         # Get value based on key.
         self.key_map = {
@@ -89,65 +159,6 @@ class NetboxAsInventory(object):
             "custom": "value",
             "ip": "address"
         }
-
-    def _get_value_by_path(self, source_dict, key_path,
-                           ignore_key_error=False, default=""):
-        """Get key value from nested dict by path.
-
-        Args:
-            source_dict: The dict that we look into.
-            key_path: A list has the path of key. e.g. [parent_dict, child_dict, key_name].
-            ignore_key_error: Ignore KeyError if the key is not found in provided path.
-            default: Set default value if the key is not found in provided path.
-
-        Returns:
-            If key is found in provided path, it will be returned.
-            If ignore_key_error is True, None will be returned.
-            If default is defined and key is not found, default will be returned.
-        """
-
-        key_value = ""
-        try:
-            # Reduce key path, where it get value from nested dict.
-            # a replacement for buildin reduce function.
-            for key in key_path:
-                if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
-                    source_dict = source_dict.get(key)
-                    key_path = key_path[1:]
-                    self._get_value_by_path(source_dict, key_path,
-                                            ignore_key_error=ignore_key_error, default=default)
-                else:
-                    key_value = source_dict[key]
-
-        # How to set the key value, if the key was not found.
-        except KeyError as key_name:
-            if default:
-                key_value = default
-            elif not default and ignore_key_error:
-                key_value = None
-            elif not key_value and not ignore_key_error:
-                sys.exit("The key %s is not found. Please remember, Python is case sensitive." % key_name)
-        return key_value
-
-    def _config(self, key_path, default=""):
-        """Get value from config var.
-
-        Args:
-            key_path: A list has the path of the key.
-            default: Default value if the key is not found.
-
-        Returns:
-            The value of the key from config file or the default value.
-        """
-        config = self.script_config.setdefault("netbox", {})
-        value = self._get_value_by_path(config, key_path, ignore_key_error=True, default=default)
-
-        if value:
-            key_value = value
-        else:
-            sys.exit("The key '%s' is not found in config file." % ".".join(key_path))
-
-        return key_value
 
     @staticmethod
     def get_hosts_list(api_url, specific_host=None):
@@ -234,7 +245,7 @@ class NetboxAsInventory(object):
                 # The groups that will be used to group hosts in the inventory.
                 for group in groups_categories[category]:
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    group_value = self._get_value_by_path(data_dict, [group, key_name])
+                    group_value = _get_value_by_path(data_dict, [group, key_name])
                     inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
 
         # If no groups in "group_by" section, the host will go to catch-all group.
@@ -278,7 +289,7 @@ class NetboxAsInventory(object):
                     # This is because "custom_fields" has more than 1 type.
                     # Values inside "custom_fields" could be a key:value or a dict.
                     if isinstance(data_dict.get(var_data), dict):
-                        var_value = self._get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
+                        var_value = _get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
                     else:
                         var_value = data_dict.get(var_data)
 
@@ -304,9 +315,9 @@ class NetboxAsInventory(object):
             The dict "inventory_dict" after updating the host meta data.
         """
 
-        if host_vars and not self.host:
+        if host_vars and not self.config.args['host']:
             inventory_dict['_meta']['hostvars'].update({host_name: host_vars})
-        elif host_vars and self.host:
+        elif host_vars and self.config.args['host']:
             inventory_dict.update({host_name: host_vars})
         return inventory_dict
 
@@ -318,7 +329,7 @@ class NetboxAsInventory(object):
         """
 
         inventory_dict = dict()
-        netbox_hosts_list = self.get_hosts_list(self.api_url, self.host)
+        netbox_hosts_list = self.get_hosts_list(self.config.main['api_url'], self.config.args['host'])
         if isinstance(netbox_hosts_list, dict) and "results" in netbox_hosts_list:
             netbox_hosts_list = netbox_hosts_list["results"]
 
@@ -326,8 +337,8 @@ class NetboxAsInventory(object):
             inventory_dict.update({"_meta": {"hostvars": {}}})
             for current_host in netbox_hosts_list:
                 server_name = current_host.get("name")
-                self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                self.add_host_to_inventory(self.config.group_by, inventory_dict, current_host)
+                host_vars = self.get_host_vars(current_host, self.config.hosts_vars)
                 inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
 
@@ -341,9 +352,9 @@ class NetboxAsInventory(object):
             It prints the inventory in JSON format if condition is true.
         """
 
-        if self.host:
-            result = inventory_dict.setdefault(self.host, {})
-        elif self.list:
+        if self.config.args['host']:
+            result = inventory_dict.setdefault(self.config.args['host'], {})
+        elif self.config.args['list']:
             result = inventory_dict
         else:
             result = {}
@@ -353,11 +364,10 @@ class NetboxAsInventory(object):
 # Main.
 def main():
     # Script vars.
-    args = cli_arguments()
-    config_data = open_yaml_file(args.config_file)
+    config = NetboxAsInventoryConfig()
 
     # Netbox vars.
-    netbox = NetboxAsInventory(args, config_data)
+    netbox = NetboxAsInventory(config)
     ansible_inventory = netbox.generate_inventory()
     netbox.print_inventory_json(ansible_inventory)
 
