@@ -80,6 +80,7 @@ class NetboxAsInventory(object):
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
         self.group_by = self._config(["group_by"], default={})
+        self.filters = self._config(["filters"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
         # Get value based on key.
@@ -150,7 +151,7 @@ class NetboxAsInventory(object):
         return key_value
 
     @staticmethod
-    def get_hosts_list(api_url, specific_host=None):
+    def get_hosts_list(api_url, specific_host=None, filters={}):
         """Retrieves hosts list from netbox API.
 
         Returns:
@@ -164,6 +165,10 @@ class NetboxAsInventory(object):
             api_url_params = {"name": specific_host}
         else:
             api_url_params = {}
+
+        # Add filters provided into the URL
+        for key, value in filters.iteritems():
+            api_url_params[key] = value
 
         # Get hosts list.
         hosts_list = requests.get(api_url, params=api_url_params)
@@ -318,7 +323,7 @@ class NetboxAsInventory(object):
         """
 
         inventory_dict = dict()
-        netbox_hosts_list = self.get_hosts_list(self.api_url, self.host)
+        netbox_hosts_list = self.get_hosts_list(self.api_url, self.host, self.filters)
         if isinstance(netbox_hosts_list, dict) and "results" in netbox_hosts_list:
             netbox_hosts_list = netbox_hosts_list["results"]
 
