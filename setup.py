@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 # Copyright 2017, Ahmed AbouZaid <http://aabouzaid.com/>
 # setup.py file is part of Netbox dynamic inventory script.
 # https://github.com/AAbouZaid/netbox-as-ansible-inventory
