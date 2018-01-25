@@ -151,7 +151,7 @@ class NetboxAsInventory(object):
         return key_value
 
     @staticmethod
-    def get_hosts_list(api_url, specific_host=None, filters={}):
+    def get_hosts_list(api_url, specific_host=None, filters=None):
         """Retrieves hosts list from netbox API.
 
         Returns:
@@ -162,13 +162,15 @@ class NetboxAsInventory(object):
             sys.exit("Please check API URL in script configuration file.")
 
         if specific_host:
-            api_url_params = {"name": specific_host}
+            api_url_params = "name=%s&" % specific_host
         else:
-            api_url_params = {}
+            api_url_params = ""
 
         # Add filters provided into the URL
-        for key, value in filters.iteritems():
-            api_url_params[key] = value
+        if filters:
+            for filter in filters:
+                for key,value in filter.items():
+                    api_url_params += "%s=%s&" % (key, value)
 
         # Get hosts list.
         hosts_list = requests.get(api_url, params=api_url_params)

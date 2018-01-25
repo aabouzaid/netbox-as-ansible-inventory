@@ -16,8 +16,8 @@ netbox:
 
     # Add filters to limit the list of host that will be returned
     # All parameters valid for the API (GET /api/dcim/devices/) are accepted
-    # filters:
-    #     site: dc1
+    filters:
+    #   - site: dc1
 
     # Use Netbox sections as host variables.
     hosts_vars:
