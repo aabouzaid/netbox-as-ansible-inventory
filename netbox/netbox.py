@@ -161,15 +161,16 @@ class NetboxAsInventory(object):
         if not api_url:
             sys.exit("Please check API URL in script configuration file.")
 
+        api_url_headers = {}
+        api_url_params = {
+            'limit': 0
+        }
+
         if api_token:
-            api_url_headers = {'Authorization': "Token %s" % api_token}
-        else:
-            api_url_headers = {}
+            api_url_headers.update({'Authorization': "Token %s" % api_token})
 
         if specific_host:
-            api_url_params = {"name": specific_host}
-        else:
-            api_url_params = {}
+            api_url_params.update({"name": specific_host})
 
         # Get hosts list.
         hosts_list = requests.get(api_url, params=api_url_params, headers=api_url_headers)
