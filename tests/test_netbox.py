@@ -34,6 +34,7 @@ netbox_config = '''
 netbox:
     main:
         api_url: 'http://localhost/api/dcim/devices/'
+        api_token: '1234567890987654321234567890987654321'
 
     # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
@@ -70,106 +71,111 @@ netbox_config_data = yaml.safe_load(netbox_config)
 #
 # Netbox api output.
 netbox_api_output = json.loads('''
-[
-  {
-    "id": 1,
-    "name": "fake_host01",
-    "display_name": "Fake Host",
-    "device_type": {
+{
+  "count": 2,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
       "id": 1,
-      "manufacturer": {
-        "id": 8,
-        "name": "Fake Manufacturer",
-        "slug": "fake_manufacturer"
-      },
-      "model": "all",
-      "slug": "all"
-    },
-    "device_role": {
-      "id": 8,
-      "name": "Fake Server",
-      "slug": "fake_server"
-    },
-    "tenant": null,
-    "platform": null,
-    "serial": "",
-    "asset_tag": "fake_tag",
-    "rack": {
-      "id": 1,
-      "name": "fake_rack01",
-      "facility_id": null,
-      "display_name": "Fake Rack01"
-    },
-    "position": null,
-    "face": null,
-    "parent_device": null,
-    "status": true,
-    "primary_ip": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.2/32"
-    },
-    "primary_ip4": {
-      "id": 1,
-      "family": 4,
-      "address": "192.168.0.2/32"
-    },
-    "primary_ip6": null,
-    "comments": "",
-    "custom_fields": {
-      "label": "Web",
-      "env": {
+      "name": "fake_host01",
+      "display_name": "Fake Host",
+      "device_type": {
         "id": 1,
-        "value": "Prod"
+        "manufacturer": {
+          "id": 8,
+          "name": "Fake Manufacturer",
+          "slug": "fake_manufacturer"
+        },
+        "model": "all",
+        "slug": "all"
+      },
+      "device_role": {
+        "id": 8,
+        "name": "Fake Server",
+        "slug": "fake_server"
+      },
+      "tenant": null,
+      "platform": null,
+      "serial": "",
+      "asset_tag": "fake_tag",
+      "rack": {
+        "id": 1,
+        "name": "fake_rack01",
+        "facility_id": null,
+        "display_name": "Fake Rack01"
+      },
+      "position": null,
+      "face": null,
+      "parent_device": null,
+      "status": true,
+      "primary_ip": {
+        "id": 1,
+        "family": 4,
+        "address": "192.168.0.2/32"
+      },
+      "primary_ip4": {
+        "id": 1,
+        "family": 4,
+        "address": "192.168.0.2/32"
+      },
+      "primary_ip6": null,
+      "comments": "",
+      "custom_fields": {
+        "label": "Web",
+        "env": {
+          "id": 1,
+          "value": "Prod"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "fake_host02",
+      "display_name": "fake_host02",
+      "device_type": {
+        "id": 1,
+        "manufacturer": {
+          "id": 8,
+          "name": "Super Micro",
+          "slug": "super-micro"
+        },
+        "model": "all",
+        "slug": "all"
+      },
+      "device_role": {
+        "id": 8,
+        "name": "Server",
+        "slug": "server"
+      },
+      "tenant": null,
+      "platform": null,
+      "serial": "",
+      "asset_tag": "xtag",
+      "rack": {
+        "id": 1,
+        "name": "fake_rack01",
+        "facility_id": null,
+        "display_name": "Fake Host 02"
+      },
+      "position": null,
+      "face": null,
+      "parent_device": null,
+      "status": true,
+      "primary_ip": null,
+      "primary_ip4": null,
+      "primary_ip6": null,
+      "comments": "",
+      "custom_fields": {
+        "label": "DB",
+        "env": {
+          "id": 1,
+          "value": "Prod"
+        }
       }
     }
-  },
-  {
-    "id": 2,
-    "name": "fake_host02",
-    "display_name": "fake_host02",
-    "device_type": {
-      "id": 1,
-      "manufacturer": {
-        "id": 8,
-        "name": "Super Micro",
-        "slug": "super-micro"
-      },
-      "model": "all",
-      "slug": "all"
-    },
-    "device_role": {
-      "id": 8,
-      "name": "Server",
-      "slug": "server"
-    },
-    "tenant": null,
-    "platform": null,
-    "serial": "",
-    "asset_tag": "xtag",
-    "rack": {
-      "id": 1,
-      "name": "fake_rack01",
-      "facility_id": null,
-      "display_name": "Fake Host 02"
-    },
-    "position": null,
-    "face": null,
-    "parent_device": null,
-    "status": true,
-    "primary_ip": null,
-    "primary_ip4": null,
-    "primary_ip6": null,
-    "comments": "",
-    "custom_fields": {
-      "label": "DB",
-      "env": {
-        "id": 1,
-        "value": "Prod"
-      }
-    }
-  }
-]
+  ]
+}
 ''')
 
 
@@ -180,12 +186,16 @@ def mock_response(json_payload):
     response.json = MagicMock(return_value=json_payload)
     return MagicMock(return_value=response)
 
+# Set API output with a single host.
+netbox_api_output_single = netbox_api_output.copy()
+netbox_api_output_single.update({
+    "results": [netbox_api_output["results"][0]]
+})
+fake_host = netbox_api_output["results"][0]
+
 # Fake API output.
 netbox_api_all_hosts = mock_response(netbox_api_output)
-netbox_api_single_host = mock_response(netbox_api_output[0])
-
-# Fake single host data.
-fake_host = netbox_api_output[0]
+netbox_api_single_host = mock_response(netbox_api_output_single)
 
 
 #
@@ -310,32 +320,43 @@ class TestNetboxAsInventory(object):
         assert empty_config_error
 
     @pytest.mark.parametrize("api_url", [
-        netbox_inventory.api_url
+        (netbox_inventory.api_url)
     ])
     def test_get_hosts_list(self, api_url):
         """
-        Test get hosts list from API and make sure it returns a list.
+        Test get hosts list from API without token and make sure it returns a list.
         """
         with patch('requests.get', netbox_api_all_hosts):
             hosts_list = netbox_inventory.get_hosts_list(api_url)
             assert isinstance(hosts_list, list)
 
-    @pytest.mark.parametrize("api_url", [
-        None
+    @pytest.mark.parametrize("api_url, api_token", [
+        (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
-    def test_get_hosts_list_none_url_value(self, api_url):
+    def test_get_hosts_list_token(self, api_url, api_token):
+        """
+        Test get hosts list from API with token and make sure it returns a list.
+        """
+        with patch('requests.get', netbox_api_all_hosts):
+            hosts_list = netbox_inventory.get_hosts_list(api_url, api_token)
+            assert isinstance(hosts_list, list)
+
+    @pytest.mark.parametrize("api_url, api_token", [
+        (None, None)
+    ])
+    def test_get_hosts_list_none_url_value(self, api_url, api_token):
         """
         Test if Netbox URL is invalid.
         """
         with patch('requests.get', netbox_api_all_hosts):
             with pytest.raises(SystemExit) as none_url_error:
-                netbox_inventory.get_hosts_list(api_url)
+                netbox_inventory.get_hosts_list(api_url, api_token)
             assert none_url_error
 
-    @pytest.mark.parametrize("api_url, host_name", [
-        (netbox_inventory_single.api_url, netbox_inventory_single.host)
+    @pytest.mark.parametrize("api_url, api_token, host_name", [
+        (netbox_inventory_single.api_url, netbox_inventory_single.api_token, netbox_inventory_single.host)
     ])
-    def test_get_hosts_list_single_host(self, api_url, host_name):
+    def test_get_hosts_list_single_host(self, api_url, api_token, host_name):
         """
         Test Netbox single host output.
         """
@@ -343,8 +364,9 @@ class TestNetboxAsInventory(object):
         with patch('requests.get', netbox_api_single_host):
             host_data = netbox_inventory_single.get_hosts_list(
                 api_url,
+                api_token,
                 specific_host=host_name)
-            assert host_data["name"] == "fake_host01"
+            assert host_data[0]["name"] == "fake_host01"
 
     @pytest.mark.parametrize("server_name, group_value, inventory_dict", [
         ("fake_server", "fake_group", {})
