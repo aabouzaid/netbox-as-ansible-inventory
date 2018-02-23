@@ -89,8 +89,8 @@ Options
 
 ::
 
-    $ netbox.py -h
-    usage: netbox.py [-h] [-c CONFIG_FILE] [--list] [--host HOST]
+    $ ansible-netbox-inventory -h
+    usage: ansible-netbox-inventory [-h] [-c CONFIG_FILE] [--list] [--host HOST]
 
     optional arguments:
       -h, --help            show this help message and exit
