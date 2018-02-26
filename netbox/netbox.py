@@ -79,7 +79,9 @@ class NetboxAsInventory(object):
         # Script configuration.
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
+        self.api_url = self._config(["main", "api_url"])
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
+        self.virtualization = self._config(["main", "virtualization"], default=False, optional=True)
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
@@ -92,7 +94,7 @@ class NetboxAsInventory(object):
         }
 
     def _get_value_by_path(self, source_dict, key_path,
-                           ignore_key_error=False, default="", error_message=""):
+                           ignore_key_error=True, default="", error_message=""):
         """Get key value from nested dict by path.
 
         Args:
@@ -333,7 +335,7 @@ class NetboxAsInventory(object):
         """
 
         inventory_dict = dict()
-        netbox_hosts_list = self.get_hosts_list(self.api_url, self.api_token, self.host)
+        netbox_hosts_list = self.get_hosts_list(self.api_url+"dcim/devices/", self.api_token, self.host)
 
         if netbox_hosts_list:
             inventory_dict.update({"_meta": {"hostvars": {}}})
@@ -342,6 +344,15 @@ class NetboxAsInventory(object):
                 self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
                 host_vars = self.get_host_vars(current_host, self.hosts_vars)
                 inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+        if self.virtualization:
+            netbox_vm_list = self.get_hosts_list(self.api_url+"virtualization/virtual-machines/", self.api_token, self.host)
+            if netbox_vm_list:
+                for current_host in netbox_vm_list:
+                    server_name = current_host.get("name")
+                    self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
+                    host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                    inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+
         return inventory_dict
 
     def print_inventory_json(self, inventory_dict):
