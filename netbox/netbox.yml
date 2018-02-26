@@ -2,6 +2,7 @@ netbox:
     main:
         api_url: 'http://localhost/api/'
         #api_token: ''
+        #virtualization: False 
 
     # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
@@ -26,3 +27,11 @@ netbox:
         # Custom sections (custom_fields) could be used as vars too.
         #custom:
         #    env: env
+
+    # Exludes are performed based on the slug
+    #exclude:
+        #role:
+        #    - "tape-library"
+        #platform:
+        #    - "edgeos"
+
