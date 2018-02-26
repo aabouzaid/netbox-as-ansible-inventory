@@ -82,6 +82,7 @@ class NetboxAsInventory(object):
         self.api_url = self._config(["main", "api_url"])
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
         self.virtualization = self._config(["main", "virtualization"], default=False, optional=True)
+        self.exclude = self._config(["exclude"], default={})
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
@@ -335,24 +336,30 @@ class NetboxAsInventory(object):
         """
 
         inventory_dict = dict()
-        netbox_hosts_list = self.get_hosts_list(self.api_url+"dcim/devices/", self.api_token, self.host)
-
-        if netbox_hosts_list:
-            inventory_dict.update({"_meta": {"hostvars": {}}})
-            for current_host in netbox_hosts_list:
-                server_name = current_host.get("name")
-                self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                host_vars = self.get_host_vars(current_host, self.hosts_vars)
-                inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+        endpoints = ["dcim/devices/"]
         if self.virtualization:
-            netbox_vm_list = self.get_hosts_list(self.api_url+"virtualization/virtual-machines/", self.api_token, self.host)
-            if netbox_vm_list:
-                for current_host in netbox_vm_list:
+            endpoints.append("virtualization/virtual-machines/")
+        
+        # Generate this outside of the loop, so we don't overwrite it.
+        inventory_dict.update({"_meta": {"hostvars": {}}})
+        for endpoint in endpoints:
+            netbox_hosts_list = self.get_hosts_list(self.api_url+endpoint, self.api_token, self.host)
+            if netbox_hosts_list:
+                for current_host in netbox_hosts_list:
                     server_name = current_host.get("name")
-                    self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                    host_vars = self.get_host_vars(current_host, self.hosts_vars)
-                    inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
-
+                    try:
+                        server_role = current_host.get("device_role")["slug"]
+                    except TypeError:
+                        server_role = None
+                    try:
+                        server_platform = current_host.get("platform")["slug"]
+                    except TypeError:
+                        server_platform = None
+                    if not (server_role in self.exclude["role"] or server_platform in self.exclude["platform"]):
+                        self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
+                        host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                        inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+                        
         return inventory_dict
 
     def print_inventory_json(self, inventory_dict):
