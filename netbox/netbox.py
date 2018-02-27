@@ -79,7 +79,6 @@ class NetboxAsInventory(object):
         # Script configuration.
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
-        self.api_url = self._config(["main", "api_url"])
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
         self.virtualization = self._config(["main", "virtualization"], default=False, optional=True)
         self.exclude = self._config(["exclude"], default={})
