@@ -27,11 +27,3 @@ netbox:
         # Custom sections (custom_fields) could be used as vars too.
         #custom:
         #    env: env
-
-    # Exludes are performed based on the slug
-    #exclude:
-        #role:
-        #    - "tape-library"
-        #platform:
-        #    - "edgeos"
-
