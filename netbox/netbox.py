@@ -337,7 +337,6 @@ class NetboxAsInventory(object):
         endpoints = ["dcim/devices/"]
         if self.virtualization:
             endpoints.append("virtualization/virtual-machines/")
-        
         # Generate this outside of the loop, so we don't overwrite it.
         inventory_dict.update({"_meta": {"hostvars": {}}})
         for endpoint in endpoints:
