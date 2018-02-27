@@ -94,7 +94,7 @@ class NetboxAsInventory(object):
         }
 
     def _get_value_by_path(self, source_dict, key_path,
-                           ignore_key_error=True, default="", error_message=""):
+                           ignore_key_error=False, default="", error_message=""):
         """Get key value from nested dict by path.
 
         Args:
@@ -251,7 +251,7 @@ class NetboxAsInventory(object):
                 # The groups that will be used to group hosts in the inventory.
                 for group in groups_categories[category]:
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    group_value = self._get_value_by_path(data_dict, [group, key_name])
+                    group_value = self._get_value_by_path(data_dict, [group, key_name], ignore_key_error=True)
                     inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
 
         # If no groups in "group_by" section, the host will go to catch-all group.
