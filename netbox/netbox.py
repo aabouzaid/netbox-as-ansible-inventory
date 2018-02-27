@@ -80,6 +80,7 @@ class NetboxAsInventory(object):
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
+        self.virtualization = self._config(["main", "virtualization"], default=False, optional=True)
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
@@ -249,7 +250,7 @@ class NetboxAsInventory(object):
                 # The groups that will be used to group hosts in the inventory.
                 for group in groups_categories[category]:
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    group_value = self._get_value_by_path(data_dict, [group, key_name])
+                    group_value = self._get_value_by_path(data_dict, [group, key_name], ignore_key_error=True)
                     inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
 
         # If no groups in "group_by" section, the host will go to catch-all group.
@@ -333,15 +334,19 @@ class NetboxAsInventory(object):
         """
 
         inventory_dict = dict()
-        netbox_hosts_list = self.get_hosts_list(self.api_url, self.api_token, self.host)
-
-        if netbox_hosts_list:
-            inventory_dict.update({"_meta": {"hostvars": {}}})
-            for current_host in netbox_hosts_list:
-                server_name = current_host.get("name")
-                self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                host_vars = self.get_host_vars(current_host, self.hosts_vars)
-                inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+        endpoints = ["dcim/devices/"]
+        if self.virtualization:
+            endpoints.append("virtualization/virtual-machines/")
+        # Generate this outside of the loop, so we don't overwrite it.
+        inventory_dict.update({"_meta": {"hostvars": {}}})
+        for endpoint in endpoints:
+            netbox_hosts_list = self.get_hosts_list(self.api_url+endpoint, self.api_token, self.host)
+            if netbox_hosts_list:
+                for current_host in netbox_hosts_list:
+                    server_name = current_host.get("name")
+                    self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
+                    host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                    inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
 
     def print_inventory_json(self, inventory_dict):
