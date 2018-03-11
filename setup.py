@@ -136,4 +136,7 @@ setup(
         'release': Release,
         'requirements': Requirements,
     },
+    entry_points={
+        'console_scripts': ['ansible-netbox-inventory=netbox.netbox:main']
+    }
 )
