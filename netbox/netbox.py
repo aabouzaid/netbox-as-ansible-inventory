@@ -297,7 +297,7 @@ class NetboxAsInventory(object):
                     else:
                         var_value = data_dict.get(var_data)
 
-                    if var_value:
+                    if var_value is not None:
                         # Remove CIDR from IP address.
                         if "ip" in host_vars and var_data in host_vars["ip"].values():
                             var_value = var_value.split("/")[0]
