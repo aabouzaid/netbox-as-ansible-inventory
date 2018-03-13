@@ -87,6 +87,9 @@ class NetboxAsInventory(object):
         self.key_map = {
             "default": "name",
             "general": "name",
+            "names": "name",
+            "slugs": "slug",
+            "labels": "value",
             "custom": "value",
             "ip": "address"
         }
@@ -236,6 +239,8 @@ class NetboxAsInventory(object):
         server_name = host_data.get("name")
         categories_source = {
             "default": host_data,
+            "names": host_data,
+            "slugs": host_data,
             "custom": host_data.get("custom_fields")
         }
 
@@ -280,6 +285,9 @@ class NetboxAsInventory(object):
             categories_source = {
                 "ip": host_data,
                 "general": host_data,
+                "names": host_data,
+                "slugs": host_data,
+                "labels": host_data,
                 "custom": host_data.get("custom_fields")
             }
 
