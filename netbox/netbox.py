@@ -122,6 +122,7 @@ class NetboxAsInventory(object):
                                             default=default, error_message=error_message)
                 else:
                     key_value = source_dict[key]
+                    break
 
         # How to set the key value, if the key was not found.
         except KeyError as key_name:
