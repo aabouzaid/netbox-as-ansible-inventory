@@ -368,7 +368,11 @@ class NetboxAsInventory(object):
 def main():
     # Script vars.
     args = cli_arguments()
-    config_data = open_yaml_file(args.config_file)
+    config_data_yaml = os.environ.get('NETBOX_CONFIG')
+    if config_data_yaml:
+        config_data = yaml.safe_load(config_data_yaml)
+    else:
+        config_data = open_yaml_file(args.config_file)
 
     # Netbox vars.
     netbox = NetboxAsInventory(args, config_data)
