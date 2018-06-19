@@ -209,13 +209,23 @@ class NetboxAsInventory(object):
 
         # The value could be None/null.
         if group_value:
-            # If the group not in the inventory it will be add.
-            if group_value not in inventory_dict:
-                inventory_dict.update({group_value: []})
+            if "," in group_value:
+                group_list = group_value.split(',')
+                for group in group_list:
+                    if group not in inventory_dict:
+                        inventory_dict.update({group: []})
 
-            # If the host not in the group it will be add.
-            if server_name not in inventory_dict[group_value]:
-                inventory_dict[group_value].append(server_name)
+                    # If the host not in the group it will be add.
+                    if server_name not in inventory_dict[group]:
+                        inventory_dict[group].append(server_name)
+            else:
+                # If the group not in the inventory it will be add.
+                if group_value not in inventory_dict:
+                    inventory_dict.update({group_value: []})
+
+                # If the host not in the group it will be add.
+                if server_name not in inventory_dict[group_value]:
+                    inventory_dict[group_value].append(server_name)
         return inventory_dict
 
     def add_host_to_inventory(self, groups_categories, inventory_dict, host_data):
@@ -379,3 +389,4 @@ def main():
 # Run main.
 if __name__ == "__main__":
     main()
+
