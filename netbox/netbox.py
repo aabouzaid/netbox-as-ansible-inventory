@@ -250,15 +250,19 @@ class NetboxAsInventory(object):
                 # The groups that will be used to group hosts in the inventory.
                 for group in groups_categories[category]:
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    group_value = self._get_value_by_path(data_dict, [group, key_name])
-                    inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
+                    # If host not assigned to that section it will be assigned as "ungrouped"
+                    if data_dict:
+                        group_value = self._get_value_by_path(data_dict, [group, key_name])
 
-        # If no groups in "group_by" section, the host will go to catch-all group.
-        else:
-            if "no_group" not in inventory_dict:
-                inventory_dict.setdefault("no_group", [server_name])
-            else:
-                inventory_dict["no_group"].append(server_name)
+                        if group_value:
+                            inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
+                        # If no groups in "group_by" section, the host will go to catch-all group.
+                        else:
+                            if "ungrouped" not in inventory_dict:
+                                inventory_dict.setdefault("ungrouped", [server_name])
+                            else:
+                                inventory_dict["ungrouped"].append(server_name)
+
         return inventory_dict
 
     def get_host_vars(self, host_data, host_vars):
