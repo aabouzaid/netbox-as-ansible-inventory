@@ -247,23 +247,34 @@ class NetboxAsInventory(object):
                 key_name = self.key_map[category]
                 data_dict = categories_source[category]
 
-                # The groups that will be used to group hosts in the inventory.
-                for group in groups_categories[category]:
-                    # Try to get group value. If the section not found in netbox, this also will print error message.
-                    # If host not assigned to that section it will be assigned as "ungrouped"
-                    if data_dict:
-                        group_value = self._get_value_by_path(data_dict, [group, key_name])
+                if groups_categories[category]:
+                    # The groups that will be used to group hosts in the inventory.
+                    for group in groups_categories[category]:
+                        # Try to get group value. If the section not found in netbox, this also will print error message.
+                        if data_dict:
+                            group_value = self._get_value_by_path(data_dict, [group, key_name])
 
-                        if group_value:
-                            inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
-                        # If no groups in "group_by" section, the host will go to catch-all group.
-                        else:
-                            if "ungrouped" not in inventory_dict:
-                                inventory_dict.setdefault("ungrouped", [server_name])
+                            if group_value:
+                                inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
+                            # If any groups defined in "group_by" section, but host is not part of that group, it will go to catch-all group.
                             else:
-                                inventory_dict["ungrouped"].append(server_name)
+                                self._put_host_to_ungrouped(inventory_dict, server_name)
+                # If any category defined but no groups in "group_by" section, the host will go to catch-all group.
+                else:
+                    self._put_host_to_ungrouped(inventory_dict, server_name)
+        # If no groups and no category in "group_by" section, the host will go to catch-all group.
+        else:
+            self._put_host_to_ungrouped(inventory_dict, server_name)
 
         return inventory_dict
+
+    @staticmethod
+    def _put_host_to_ungrouped(inventory_dict, server_name):
+        if "ungrouped" not in inventory_dict:
+            inventory_dict.setdefault("ungrouped", [server_name])
+        else:
+            if server_name not in inventory_dict["ungrouped"]:
+                inventory_dict["ungrouped"].append(server_name)
 
     def get_host_vars(self, host_data, host_vars):
         """Find host vars.

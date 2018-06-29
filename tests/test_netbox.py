@@ -410,15 +410,21 @@ class TestNetboxAsInventory(object):
          {"_meta": {"hostvars": {}}},
          fake_host),
         ({},
-         {"no_group": [], "_meta": {"hostvars": {}}},
+         {"ungrouped": [], "_meta": {"hostvars": {}}},
+         fake_host),
+        ({"default": []},
+         {"_meta": {"hostvars": {}}},
+         fake_host),
+        ({"default": ["platform"]},
+         {"_meta": {"hostvars": {}}},
          fake_host)
     ])
-    def test_add_host_to_inventory_with_no_group(self, groups_categories, inventory_dict, host_data):
+    def test_add_host_to_inventory_with_ungrouped(self, groups_categories, inventory_dict, host_data):
         """
         Test adding host to inventory with no group.
         """
         netbox_inventory.add_host_to_inventory(groups_categories, inventory_dict, host_data)
-        assert "fake_host01" in inventory_dict["no_group"]
+        assert "fake_host01" in inventory_dict["ungrouped"]
 
     @pytest.mark.parametrize("groups_categories, inventory_dict, host_data", [
         ({"default": ["arbitrary_group_name"]},
