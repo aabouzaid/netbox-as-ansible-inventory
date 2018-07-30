@@ -208,7 +208,7 @@ class NetboxAsInventory(object):
         """
 
         # The value could be None/null.
-        if group_value:
+        if server_name and group_value:
             # If the group not in the inventory it will be add.
             if group_value not in inventory_dict:
                 inventory_dict.update({group_value: []})
