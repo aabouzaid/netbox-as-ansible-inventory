@@ -173,10 +173,10 @@ class NetboxAsInventory(object):
 
         for device in source_dict:
             # Convert ID to string for each device
-            id = str(device.get('id'))
+            device_id = str(device.get('id'))
 
             # Gathers device data plus config-context
-            context_data = requests.get(api_url + id, headers=api_url_headers)
+            context_data = requests.get(api_url + device_id, headers=api_url_headers)
 
             # Check that a request is 200 and not something else like 404, 401, 500 ... etc.
             context_data.raise_for_status()
