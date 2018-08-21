@@ -88,7 +88,8 @@ class NetboxAsInventory(object):
             "default": "name",
             "general": "name",
             "custom": "value",
-            "ip": "address"
+            "ip": "address",
+            "context": "value"
         }
 
     def _get_value_by_path(self, source_dict, key_path,
@@ -152,6 +153,42 @@ class NetboxAsInventory(object):
         return key_value
 
     @staticmethod
+    def get_config_context(source_dict, api_url, api_token=None):
+        """Retrieves config_context data from each host obtained in get_hosts_list
+
+        Returns:
+            A list of all hosts from netbox API including config context data.
+            Identical data structure as get_hosts_list returns
+        """
+        
+        if not api_url:
+            sys.exit("Please check API URL in script configuration file.")
+
+        api_url_headers = {}
+
+        if api_token:
+            api_url_headers.update({"Authorization": "Token %s" % api_token})
+
+        hosts_list = []
+
+        for device in source_dict:
+            # Convert ID to string for each device
+            id = str(device.get('id'))
+  
+            # Gathers device data plus config-context
+            context_data = requests.get(api_url + id, headers=api_url_headers)
+
+            # Check that a request is 200 and not something else like 404, 401, 500 ... etc.
+            context_data.raise_for_status()
+
+            # Convert api call data to json
+            context_output_data = json.loads(context_data.text)
+
+            # Append each device to hosts_list to be returned
+            hosts_list.append(context_output_data)
+        return hosts_list
+
+    @staticmethod
     def get_hosts_list(api_url, api_token=None, specific_host=None):
         """Retrieves hosts list from netbox API.
 
@@ -183,7 +220,7 @@ class NetboxAsInventory(object):
 
             # Get api output data.
             api_output_data = api_output.json()
-
+  
             if isinstance(api_output_data, dict) and "results" in api_output_data:
                 hosts_list += api_output_data["results"]
                 api_url = api_output_data["next"]
@@ -253,7 +290,6 @@ class NetboxAsInventory(object):
                         # Try to get group value. If the section not found in netbox, this also will print error message.
                         if data_dict:
                             group_value = self._get_value_by_path(data_dict, [group, key_name])
-
                             if group_value:
                                 inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
                             # If any groups defined in "group_by" section, but host is not part of that group, it will go to catch-all group.
@@ -296,7 +332,8 @@ class NetboxAsInventory(object):
             categories_source = {
                 "ip": host_data,
                 "general": host_data,
-                "custom": host_data.get("custom_fields")
+                "custom": host_data.get("custom_fields"),
+                "context": host_data
             }
 
             # Get host vars based on selected vars. (that should come from
@@ -308,11 +345,12 @@ class NetboxAsInventory(object):
                 for var_name, var_data in host_vars[category].items():
                     # This is because "custom_fields" has more than 1 type.
                     # Values inside "custom_fields" could be a key:value or a dict.
-                    if isinstance(data_dict.get(var_data), dict):
+                    if 'config-context' in var_name:
+                        var_value = data_dict.get(var_data)
+                    elif isinstance(data_dict.get(var_data), dict):
                         var_value = self._get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
                     else:
                         var_value = data_dict.get(var_data)
-
                     if var_value is not None:
                         # Remove CIDR from IP address.
                         if "ip" in host_vars and var_data in host_vars["ip"].values():
@@ -350,6 +388,9 @@ class NetboxAsInventory(object):
 
         inventory_dict = dict()
         netbox_hosts_list = self.get_hosts_list(self.api_url, self.api_token, self.host)
+
+        if 'context' in self.hosts_vars:
+            netbox_hosts_list = self.get_config_context(netbox_hosts_list, self.api_url, self.api_token)
 
         if netbox_hosts_list:
             inventory_dict.update({"_meta": {"hostvars": {}}})
