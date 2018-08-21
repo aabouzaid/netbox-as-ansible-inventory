@@ -160,7 +160,7 @@ class NetboxAsInventory(object):
             A list of all hosts from netbox API including config context data.
             Identical data structure as get_hosts_list returns
         """
-        
+
         if not api_url:
             sys.exit("Please check API URL in script configuration file.")
 
@@ -174,7 +174,7 @@ class NetboxAsInventory(object):
         for device in source_dict:
             # Convert ID to string for each device
             id = str(device.get('id'))
-  
+
             # Gathers device data plus config-context
             context_data = requests.get(api_url + id, headers=api_url_headers)
 
@@ -195,7 +195,6 @@ class NetboxAsInventory(object):
         Returns:
             A list of all hosts from netbox API.
         """
-
         if not api_url:
             sys.exit("Please check API URL in script configuration file.")
 
@@ -220,7 +219,7 @@ class NetboxAsInventory(object):
 
             # Get api output data.
             api_output_data = api_output.json()
-  
+
             if isinstance(api_output_data, dict) and "results" in api_output_data:
                 hosts_list += api_output_data["results"]
                 api_url = api_output_data["next"]
@@ -290,6 +289,7 @@ class NetboxAsInventory(object):
                         # Try to get group value. If the section not found in netbox, this also will print error message.
                         if data_dict:
                             group_value = self._get_value_by_path(data_dict, [group, key_name])
+
                             if group_value:
                                 inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
                             # If any groups defined in "group_by" section, but host is not part of that group, it will go to catch-all group.
@@ -346,7 +346,6 @@ class NetboxAsInventory(object):
                     # This is because "custom_fields" has more than 1 type.
                     # Values inside "custom_fields" could be a key:value or a dict.
                     if 'context' in category:
-                    #if 'config_context' in var_name:
                         var_value = data_dict.get(var_data)
                     elif isinstance(data_dict.get(var_data), dict):
                         var_value = self._get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
