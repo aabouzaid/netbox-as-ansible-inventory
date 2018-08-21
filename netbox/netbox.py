@@ -345,7 +345,8 @@ class NetboxAsInventory(object):
                 for var_name, var_data in host_vars[category].items():
                     # This is because "custom_fields" has more than 1 type.
                     # Values inside "custom_fields" could be a key:value or a dict.
-                    if 'config-context' in var_name:
+                    if 'context' in category:
+                    #if 'config_context' in var_name:
                         var_value = data_dict.get(var_data)
                     elif isinstance(data_dict.get(var_data), dict):
                         var_value = self._get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
