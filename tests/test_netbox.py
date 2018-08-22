@@ -77,17 +77,14 @@ netbox_api_output = json.loads('''
   "count": 2,
   "next": null,
   "previous": null,
-  "results": 
-  [    
+  "results": [    
     {
       "id": 1,
       "name": "fake_host01",
       "display_name": "Fake Host",
-      "device_type": 
-      {
+      "device_type": {
         "id": 1,
-        "manufacturer": 
-        {
+        "manufacturer": {
           "id": 8,
           "name": "Fake Manufacturer",
           "slug": "fake_manufacturer"
@@ -158,7 +155,7 @@ netbox_api_output = json.loads('''
         "manufacturer": 
         {
           "id": 8,
-          "name": "Super Micro",
+          "name": "Super Micro"
           "slug": "super-micro"
         },
         "model": "all",
@@ -353,7 +350,7 @@ class TestNetboxAsInventory(object):
         assert empty_config_error
 
     @pytest.mark.parametrize("netbox_api_all_hosts, api_url", [
-        (netbox_inventory.api_url)
+        (netbox_api_all_hosts, netbox_inventory.api_url)
     ])
     def test_get_config_context_all_hosts(self, netbox_api_all_hosts, api_url):
         '''
@@ -363,17 +360,17 @@ class TestNetboxAsInventory(object):
         assert isinstance(hosts_list[0]["config_context"], dict)
 
     @pytest.mark.parametrize("netbox_api_single_host, api_url", [
-        (netbox_inventory.api_url)
+        (netbox_api_single_host, netbox_inventory.api_url)
     ])
     def test_get_config_context_single_host(self, netbox_api_single_host, api_url):
         '''
         Test gathering context_data from a single device.
         '''
         hosts_list = netbox_inventory.get_config_context(netbox_api_single_host, api_url)
-        assert isinstance(hosts_list["config_context"], dict)
+        assert isinstance(hosts_list[0]["config_context"], dict)
 
     @pytest.mark.parametrize("netbox_api_all_hosts, api_url, api_token", [
-        (netbox_inventory.api_url, netbox_inventory.api_token)
+        (netbox_api_all_hosts, netbox_inventory.api_url, netbox_inventory.api_token)
     ])
     def test_get_config_context_token(self, netbox_api_all_hosts, api_url, api_token):
         """
