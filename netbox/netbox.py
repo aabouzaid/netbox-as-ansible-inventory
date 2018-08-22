@@ -153,7 +153,7 @@ class NetboxAsInventory(object):
         return key_value
 
     @staticmethod
-    def get_config_context(source_dict, api_url, api_token=None):
+    def get_config_context(netbox_host_list, api_url, api_token=None):
         """Retrieves config_context data from each host obtained in get_hosts_list
 
         Returns:
@@ -171,7 +171,7 @@ class NetboxAsInventory(object):
 
         hosts_list = []
 
-        for device in source_dict:
+        for device in netbox_host_list:
             # Convert ID to string for each device
             device_id = str(device.get('id'))
 

@@ -358,9 +358,10 @@ class TestNetboxAsInventory(object):
         '''
         Test gathering context_data from all devices.
         '''
-        with patch('requests.get', netbox_api_all_hosts):
+        #with patch('requests.get', netbox_api_all_hosts):
             hosts_list = netbox_inventory.get_hosts_list(api_url)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url)
+            assert isinstance(hosts_list, list)
             assert isinstance(context_data[0]["config_context"], dict)
 
     @pytest.mark.parametrize("api_url, api_token, host_name", [
@@ -371,11 +372,12 @@ class TestNetboxAsInventory(object):
         Test gathering context_data from a single device.
         '''
         with patch('requests.get', netbox_api_single_host):
-            host_data = netbox_inventory_single.get_hosts_list(
+            hosts_list = netbox_inventory_single.get_hosts_list(
                 api_url,
                 api_token,
                 specific_host=host_name)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url)
+            assert isinstance(hosts_list, list)
             assert isinstance(context_data[0]["config_context"], dict)
 
     @pytest.mark.parametrize("api_url, api_token", [
@@ -388,6 +390,7 @@ class TestNetboxAsInventory(object):
         with patch('requests.get', netbox_api_all_hosts):
             hosts_list = netbox_inventory.get_hosts_list(api_url, api_token)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url, api_token)
+            assert isinstance(hosts_list, list)
             assert isinstance(context_data[0]["config_context"], dict)
 
     @pytest.mark.parametrize("api_url", [
