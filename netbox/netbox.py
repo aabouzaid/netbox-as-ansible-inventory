@@ -160,6 +160,7 @@ class NetboxAsInventory(object):
             A list of all hosts from netbox API including config context data.
             Identical data structure as get_hosts_list returns
         """
+
         if not api_url:
             sys.exit("Please check API URL in script configuration file.")
 
@@ -268,6 +269,7 @@ class NetboxAsInventory(object):
         Returns:
             The dict "inventory_dict" after adding the host to it.
         """
+
         server_name = host_data.get("name")
         categories_source = {
             "default": host_data,
@@ -324,6 +326,7 @@ class NetboxAsInventory(object):
         Returns:
             A dict has all vars are associated with the host.
         """
+
         host_vars_dict = dict()
         if host_vars:
             categories_source = {
@@ -332,6 +335,7 @@ class NetboxAsInventory(object):
                 "custom": host_data.get("custom_fields"),
                 "context": host_data
             }
+
             # Get host vars based on selected vars. (that should come from
             # script's config file)
             for category in host_vars:
@@ -368,6 +372,7 @@ class NetboxAsInventory(object):
         Returns:
             The dict "inventory_dict" after updating the host meta data.
         """
+
         if host_vars and not self.host:
             inventory_dict['_meta']['hostvars'].update({host_name: host_vars})
         elif host_vars and self.host:
@@ -380,6 +385,7 @@ class NetboxAsInventory(object):
         Returns:
             A dict has inventory with hosts and their vars.
         """
+
         inventory_dict = dict()
         netbox_hosts_list = self.get_hosts_list(self.api_url, self.api_token, self.host)
 
@@ -404,6 +410,7 @@ class NetboxAsInventory(object):
         Returns:
             It prints the inventory in JSON format if condition is true.
         """
+
         if self.host:
             result = inventory_dict.setdefault(self.host, {})
         elif self.list:

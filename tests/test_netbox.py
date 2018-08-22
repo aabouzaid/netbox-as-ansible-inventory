@@ -378,7 +378,7 @@ class TestNetboxAsInventory(object):
                 specific_host=host_name)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url)
             assert isinstance(hosts_list, list)
-            assert isinstance(context_data[0]["config_context"], dict)
+            assert isinstance(context_data["config_context"], dict)
 
     @pytest.mark.parametrize("api_url, api_token", [
         (netbox_inventory.api_url, netbox_inventory.api_token)
