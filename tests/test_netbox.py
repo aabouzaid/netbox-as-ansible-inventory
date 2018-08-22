@@ -157,7 +157,7 @@ netbox_api_output = json.loads('''
         "manufacturer":
         {
           "id": 8,
-          "name": "Super Micro"
+          "name": "Super Micro",
           "slug": "super-micro"
         },
         "model": "all",
