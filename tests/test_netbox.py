@@ -337,32 +337,32 @@ class TestNetboxAsInventory(object):
         (netbox_inventory.api_url)
     ])
     def test_get_config_context_all_hosts(self, netbox_api_all_hosts, api_url):
-      '''
-      Test gathering context_data from all devices.
-      '''
-      hosts_list = netbox_inventory.get_config_context(netbox_api_all_hosts, api_url)
-      assert isinstance(hosts_list[0]["config_context"], dict)
+        '''
+        Test gathering context_data from all devices.
+        '''
+        hosts_list = netbox_inventory.get_config_context(netbox_api_all_hosts, api_url)
+        assert isinstance(hosts_list[0]["config_context"], dict)
 
     @pytest.mark.parametrize("netbox_api_single_host, api_url", [
         (netbox_inventory.api_url)
     ])
     def test_get_config_context_single_host(self, netbox_api_single_host, api_url):
-      '''
-      Test gathering context_data from a single device.
-      '''
-      hosts_list = netbox_inventory.get_config_context(netbox_api_all_hosts, api_url)
-      assert isinstance(hosts_list["config_context"], dict)
+        '''
+        Test gathering context_data from a single device.
+        '''
+        hosts_list = netbox_inventory.get_config_context(netbox_api_single_host, api_url)
+        assert isinstance(hosts_list["config_context"], dict)
 
     @pytest.mark.parametrize("netbox_api_all_hosts, api_url, api_token", [
         (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
-    def test_get_config_context_token(self, api_url, api_token):
+    def test_get_config_context_token(self, netbox_api_all_hosts, api_url, api_token):
         """
         Test get config context from API with token and make sure it returns a config context and its a dict.
         """
         with patch('requests.get', netbox_api_all_hosts):
             hosts_list = netbox_inventory.get_config_text(netbox_api_all_hosts, api_url, api_token)
-            assert isinstance(hosts_list["config_context"], dict)
+            assert isinstance(hosts_list[0]["config_context"], dict)
 
     @pytest.mark.parametrize("api_url", [
         (netbox_inventory.api_url)
@@ -529,6 +529,7 @@ class TestNetboxAsInventory(object):
             ansible_inventory = netbox_inventory.generate_inventory()
             assert "fake_host01" in ansible_inventory["_meta"]["hostvars"]
             assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"], dict)
+            assert isinstance(ansible_inventory["_meta"]["hostvars"]["fake_host02"]["config_context"], dict)
 
     @pytest.mark.parametrize("inventory_dict", [
         {
