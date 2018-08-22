@@ -352,7 +352,7 @@ class TestNetboxAsInventory(object):
         assert empty_config_error
 
     @pytest.mark.parametrize("netbox_api_all_hosts, api_url", [
-        (netbox_api_all_hosts, netbox_inventory.api_url)
+        (netbox_inventory.api_url)
     ])
     def test_get_config_context_all_hosts(self, api_url):
         '''
@@ -364,19 +364,19 @@ class TestNetboxAsInventory(object):
             assert isinstance(context_data[0]["config_context"], dict)
 
     @pytest.mark.parametrize("netbox_api_single_host, api_url", [
-        (netbox_api_single_host, netbox_inventory.api_url)
+        (netbox_inventory_single.api_url, netbox_inventory_single.api_token, netbox_inventory_single.host)
     ])
     def test_get_config_context_single_host(self, api_url, api_token, host_name):
         '''
         Test gathering context_data from a single device.
         '''
-        with patch('requests.get', netbox_api_all_hosts):
+        with patch('requests.get', netbox_api_single_host):
             hosts_list = netbox_inventory.get_hosts_list(api_url, api_token, host_name)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url)
             assert isinstance(context_data[0]["config_context"], dict)
 
     @pytest.mark.parametrize("netbox_api_all_hosts, api_url, api_token", [
-        (netbox_api_all_hosts, netbox_inventory.api_url, netbox_inventory.api_token)
+        (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
     def test_get_config_context_token(self, api_url, api_token):
         """
