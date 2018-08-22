@@ -82,9 +82,11 @@ netbox_api_output = json.loads('''
       "id": 1,
       "name": "fake_host01",
       "display_name": "Fake Host",
-      "device_type": {
+      "device_type":
+      {
         "id": 1,
-        "manufacturer": {
+        "manufacturer":
+        {
           "id": 8,
           "name": "Fake Manufacturer",
           "slug": "fake_manufacturer"
@@ -119,7 +121,7 @@ netbox_api_output = json.loads('''
         "family": 4,
         "address": "192.168.0.2/32"
       },
-      "primary_ip4": 
+      "primary_ip4":
       {
         "id": 1,
         "family": 4,
