@@ -77,14 +77,17 @@ netbox_api_output = json.loads('''
   "count": 2,
   "next": null,
   "previous": null,
-  "results": [
+  "results": 
+  [    
     {
       "id": 1,
       "name": "fake_host01",
       "display_name": "Fake Host",
-      "device_type": {
+      "device_type": 
+      {
         "id": 1,
-        "manufacturer": {
+        "manufacturer": 
+        {
           "id": 8,
           "name": "Fake Manufacturer",
           "slug": "fake_manufacturer"
@@ -92,7 +95,8 @@ netbox_api_output = json.loads('''
         "model": "all",
         "slug": "all"
       },
-      "device_role": {
+      "device_role": 
+      {
         "id": 8,
         "name": "Fake Server",
         "slug": "fake_server"
@@ -101,7 +105,8 @@ netbox_api_output = json.loads('''
       "platform": null,
       "serial": "",
       "asset_tag": "fake_tag",
-      "rack": {
+      "rack": 
+      {
         "id": 1,
         "name": "fake_rack01",
         "facility_id": null,
@@ -111,39 +116,47 @@ netbox_api_output = json.loads('''
       "face": null,
       "parent_device": null,
       "status": true,
-      "primary_ip": {
+      "primary_ip": 
+      {
         "id": 1,
         "family": 4,
         "address": "192.168.0.2/32"
       },
-      "primary_ip4": {
+      "primary_ip4": 
+      {
         "id": 1,
         "family": 4,
         "address": "192.168.0.2/32"
       },
       "primary_ip6": null,
       "comments": "",
-      "custom_fields": {
+      "custom_fields": 
+      {
         "label": "Web",
-        "env": {
+        "env": 
+        {
           "id": 1,
           "value": "Prod"
         }
       },
-      "config_context": {
-        "ntp-servers": {
-          "ntp1": "192.168.1.1"
+      "config_context": 
+      {
+        "ntp-servers": 
+        {
+          "ntp1": "192.168.1.1",
           "ntp2": "192.168.1.2"
-          }
+        }
       }
-    },
+    },    
     {
       "id": 2,
       "name": "fake_host02",
       "display_name": "fake_host02",
-      "device_type": {
+      "device_type": 
+      {
         "id": 1,
-        "manufacturer": {
+        "manufacturer": 
+        {
           "id": 8,
           "name": "Super Micro",
           "slug": "super-micro"
@@ -151,7 +164,8 @@ netbox_api_output = json.loads('''
         "model": "all",
         "slug": "all"
       },
-      "device_role": {
+      "device_role": 
+      {
         "id": 8,
         "name": "Server",
         "slug": "server"
@@ -160,7 +174,8 @@ netbox_api_output = json.loads('''
       "platform": null,
       "serial": "",
       "asset_tag": "xtag",
-      "rack": {
+      "rack": 
+      {
         "id": 1,
         "name": "fake_rack01",
         "facility_id": null,
@@ -174,16 +189,20 @@ netbox_api_output = json.loads('''
       "primary_ip4": null,
       "primary_ip6": null,
       "comments": "",
-      "custom_fields": {
+      "custom_fields": 
+      {
         "label": "DB",
-        "env": {
+        "env": 
+        {
           "id": 1,
           "value": "Prod"
         }
       },
-      "config_context": {
-        "ntp-servers": {
-          "ntp1": "192.168.1.1"
+      "config_context": 
+      {
+        "ntp-servers": 
+        {
+          "ntp1": "192.168.1.1",
           "ntp2": "192.168.1.2"
         }
       }
