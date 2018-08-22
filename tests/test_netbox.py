@@ -351,7 +351,7 @@ class TestNetboxAsInventory(object):
             netbox.NetboxAsInventory(args, config)
         assert empty_config_error
 
-    @pytest.mark.parametrize("netbox_api_all_hosts, api_url", [
+    @pytest.mark.parametrize("api_url", [
         (netbox_inventory.api_url)
     ])
     def test_get_config_context_all_hosts(self, api_url):
@@ -363,7 +363,7 @@ class TestNetboxAsInventory(object):
             context_data = netbox_inventory.get_config_context(hosts_list, api_url)
             assert isinstance(context_data[0]["config_context"], dict)
 
-    @pytest.mark.parametrize("netbox_api_single_host, api_url", [
+    @pytest.mark.parametrize("api_url, api_token, host_name", [
         (netbox_inventory_single.api_url, netbox_inventory_single.api_token, netbox_inventory_single.host)
     ])
     def test_get_config_context_single_host(self, api_url, api_token, host_name):
@@ -371,11 +371,14 @@ class TestNetboxAsInventory(object):
         Test gathering context_data from a single device.
         '''
         with patch('requests.get', netbox_api_single_host):
-            hosts_list = netbox_inventory.get_hosts_list(api_url, api_token, host_name)
+            host_data = netbox_inventory_single.get_hosts_list(
+                api_url,
+                api_token,
+                specific_host=host_name)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url)
             assert isinstance(context_data[0]["config_context"], dict)
 
-    @pytest.mark.parametrize("netbox_api_all_hosts, api_url, api_token", [
+    @pytest.mark.parametrize("api_url, api_token", [
         (netbox_inventory.api_url, netbox_inventory.api_token)
     ])
     def test_get_config_context_token(self, api_url, api_token):
@@ -383,7 +386,7 @@ class TestNetboxAsInventory(object):
         Test get config context from API with token and make sure it returns a config context and its a dict.
         """
         with patch('requests.get', netbox_api_all_hosts):
-            hosts_list = netbox_inventory.get_hosts_list(api_url)
+            hosts_list = netbox_inventory.get_hosts_list(api_url, api_token)
             context_data = netbox_inventory.get_config_context(hosts_list, api_url, api_token)
             assert isinstance(context_data[0]["config_context"], dict)
 
