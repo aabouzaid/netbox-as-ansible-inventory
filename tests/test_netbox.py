@@ -77,7 +77,7 @@ netbox_api_output = json.loads('''
   "count": 2,
   "next": null,
   "previous": null,
-  "results": [    
+  "results": [
     {
       "id": 1,
       "name": "fake_host01",
@@ -92,7 +92,7 @@ netbox_api_output = json.loads('''
         "model": "all",
         "slug": "all"
       },
-      "device_role": 
+      "device_role":
       {
         "id": 8,
         "name": "Fake Server",
@@ -102,7 +102,7 @@ netbox_api_output = json.loads('''
       "platform": null,
       "serial": "",
       "asset_tag": "fake_tag",
-      "rack": 
+      "rack":
       {
         "id": 1,
         "name": "fake_rack01",
@@ -113,7 +113,7 @@ netbox_api_output = json.loads('''
       "face": null,
       "parent_device": null,
       "status": true,
-      "primary_ip": 
+      "primary_ip":
       {
         "id": 1,
         "family": 4,
@@ -127,32 +127,32 @@ netbox_api_output = json.loads('''
       },
       "primary_ip6": null,
       "comments": "",
-      "custom_fields": 
+      "custom_fields":
       {
         "label": "Web",
-        "env": 
+        "env":
         {
           "id": 1,
           "value": "Prod"
         }
       },
-      "config_context": 
+      "config_context":
       {
-        "ntp-servers": 
+        "ntp-servers":
         {
           "ntp1": "192.168.1.1",
           "ntp2": "192.168.1.2"
         }
       }
-    },    
+    },
     {
       "id": 2,
       "name": "fake_host02",
       "display_name": "fake_host02",
-      "device_type": 
+      "device_type":
       {
         "id": 1,
-        "manufacturer": 
+        "manufacturer":
         {
           "id": 8,
           "name": "Super Micro"
@@ -161,7 +161,7 @@ netbox_api_output = json.loads('''
         "model": "all",
         "slug": "all"
       },
-      "device_role": 
+      "device_role":
       {
         "id": 8,
         "name": "Server",
@@ -171,7 +171,7 @@ netbox_api_output = json.loads('''
       "platform": null,
       "serial": "",
       "asset_tag": "xtag",
-      "rack": 
+      "rack":
       {
         "id": 1,
         "name": "fake_rack01",
@@ -186,18 +186,18 @@ netbox_api_output = json.loads('''
       "primary_ip4": null,
       "primary_ip6": null,
       "comments": "",
-      "custom_fields": 
+      "custom_fields":
       {
         "label": "DB",
-        "env": 
+        "env":
         {
           "id": 1,
           "value": "Prod"
         }
       },
-      "config_context": 
+      "config_context":
       {
-        "ntp-servers": 
+        "ntp-servers":
         {
           "ntp1": "192.168.1.1",
           "ntp2": "192.168.1.2"
