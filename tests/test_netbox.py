@@ -209,7 +209,7 @@ netbox_api_output = json.loads('''
 }
 ''')
 
-netbox_api_config_context_output = json.loads('''
+netbox_api_config_context_fake_host01 = json.loads('''
 {
   "id": 1,
   "name": "fake_host01",
@@ -271,6 +271,60 @@ netbox_api_config_context_output = json.loads('''
 }
 ''')
 
+netbox_api_config_context_fake_host02 = json.loads('''
+{
+  "id": 2,
+  "name": "fake_host02",
+  "display_name": "fake_host02",
+  "device_type": {
+    "id": 1,
+    "manufacturer": {
+      "id": 8,
+      "name": "Super Micro",
+      "slug": "super-micro"
+    },
+      "model": "all",
+    "slug": "all"
+  },
+  "device_role": {
+    "id": 8,
+    "name": "Server",
+    "slug": "server"
+  },
+  "tenant": null,
+  "platform": null,
+  "serial": "",
+  "asset_tag": "xtag",
+  "rack": {
+    "id": 1,
+    "name": "fake_rack01",
+    "facility_id": null,
+    "display_name": "Fake Host 02"
+  },
+  "position": null,
+  "face": null,
+  "parent_device": null,
+  "status": true,
+  "primary_ip": null,
+  "primary_ip4": null,
+  "primary_ip6": null,
+  "comments": "",
+  "custom_fields": {
+    "label": "DB",
+    "env": {
+      "id": 1,
+      "value": "Prod"
+    }
+  },
+  "config_context": {
+  "ntp_servers": {
+    "ntp1": "192.168.1.1",
+    "ntp2": "192.168.1.2"
+    }
+  }
+}
+''')
+
 
 # Fake Netbox API response.
 def mock_response(json_payload):
@@ -278,6 +332,7 @@ def mock_response(json_payload):
     response.status_code = 200
     response.json = MagicMock(return_value=json_payload)
     return MagicMock(return_value=response)
+
 
 # Set API output with a single host.
 netbox_api_output_single = netbox_api_output.copy()
@@ -290,11 +345,11 @@ netbox_output_config_context = netbox_api_output["results"]
 # Fake API output.
 netbox_api_all_hosts = mock_response(netbox_api_output)
 netbox_api_single_host = mock_response(netbox_api_output_single)
-netbox_api_config_context = mock_response(netbox_api_config_context_output)
+netbox_api_config_context_fake_host01 = mock_response(netbox_api_config_context_fake_host01)
+netbox_api_config_context_fake_host02 = mock_response(netbox_api_config_context_fake_host02)
 
 # Fake hosts list for config context tests
-netbox_host_list = []
-netbox_host_list.append(netbox_api_output["results"][0])
+netbox_host_list = netbox_api_output["results"]
 
 
 #
@@ -303,6 +358,7 @@ class Args(object):
     config_file = "netbox.yml"
     host = None
     list = True
+
 
 netbox_inventory = netbox.NetboxAsInventory(Args, netbox_config_data)
 Args.list = False
@@ -422,13 +478,16 @@ class TestNetboxAsInventory(object):
     @pytest.mark.parametrize("netbox_host_list, api_url", [
         (netbox_host_list, netbox_inventory.api_url)
     ])
+    @patch('requests.get', netbox_api_config_context_fake_host02)
+    @patch('requests.get', netbox_api_config_context_fake_host01)
     def test_get_config_context(self, netbox_host_list, api_url):
         """
         Test get config context without token and makes sure it returns a config_context as dict
         """
-        with patch('requests.get', netbox_api_config_context):
-            config_context_output = netbox_inventory_config_context.get_config_context(netbox_host_list, api_url)
-            assert isinstance(config_context_output[0]['config_context'], dict)
+        config_context_output = netbox_inventory_config_context.get_config_context(netbox_host_list, api_url)
+        assert isinstance(config_context_output, list)
+        assert isinstance(config_context_output[0]['config_context'], dict)
+        assert isinstance(config_context_output[1]['config_context'], dict)
 
     @pytest.mark.parametrize("api_url", [
         (netbox_inventory.api_url)
