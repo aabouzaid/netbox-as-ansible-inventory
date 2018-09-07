@@ -1,6 +1,6 @@
 netbox:
     main:
-        api_url: 'http://localhost/api/dcim/devices/'
+        api_url: 'http://tchnetbox/api/'
         #api_token: ''
 
     # How servers will be grouped.
@@ -8,12 +8,13 @@ netbox:
     group_by:
         # Default section in Netbox.
         default:
+        #    - tags
             - device_role
-            - rack
-            - platform
+        #    - rack
+        #    - platform
         # Custom sections (custom_fields) could be used.
-        #custom:
-        #    - env
+        custom:
+            - ansible_group
 
     # Use Netbox sections as host variables.
     hosts_vars:
@@ -22,7 +23,16 @@ netbox:
             ansible_ssh_host: primary_ip
         # Any other sections.
         general:
-            rack_name: rack
+            model: model
+            serial: serial
+            asset_tag: asset_tag
         # Custom sections (custom_fields) could be used as vars too.
-        #custom:
-        #    env: env
+        custom:
+            eigrp_summary: eigrp_summary
+            vrf_guest: vrf_guest
+            vrf_restricted: vrf_restricted
+            vrf_pci: vrf_pci
+        context:
+            config_context: config_context
+        interfaces:
+            interfaces: interfaces
