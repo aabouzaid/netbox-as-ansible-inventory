@@ -1,6 +1,6 @@
 netbox:
     main:
-        api_url: 'http://tchnetbox/api/'
+        api_url: 'http://localhost/api/'
         #api_token: ''
 
     # How servers will be grouped.
