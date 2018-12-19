@@ -1,4 +1,4 @@
-letbox:
+netbox:
     main:
         api_base_url: 'http://localhost/api/'
         api_token: 'abcdefghijklmnopqrstuvwxyz1234567890'
@@ -7,7 +7,7 @@ letbox:
           - 'dcim/devices/'
         #api_token: ''
 
-    # how servers will be grouped.
+    # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
     group_by:
         # Default section in Netbox.
