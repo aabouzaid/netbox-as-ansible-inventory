@@ -27,7 +27,7 @@ def cli_arguments():
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-c", "--config-file",
-                        default=os.getenv("NETBOX_CONFIG_FILE", "netbox.yml"),
+                        default=os.getenv("NETBOX_CONFIG_FILE", os.path.dirname(os.path.realpath(__file__)) + "/netbox.yml"),
                         help="""Path for script's configuration. Also "NETBOX_CONFIG_FILE"
                                 could be used as env var to set conf file path.""")
     parser.add_argument("--list", help="Print all hosts with vars as Ansible dynamic inventory syntax.",
@@ -78,7 +78,8 @@ class NetboxAsInventory(object):
 
         # Script configuration.
         self.script_config = script_config_data
-        self.api_url = self._config(["main", "api_url"])
+        self.api_base_url = self._config(["main", "api_base_url"])
+        self.api_paths = self._config(["main", "api_paths"])
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
@@ -255,7 +256,11 @@ class NetboxAsInventory(object):
                             group_value = self._get_value_by_path(data_dict, [group, key_name])
 
                             if group_value:
-                                inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
+                                if isinstance(group_value, list):
+                                	for list_group in group_value:
+                                		inventory_dict = self.add_host_to_group(server_name, list_group, inventory_dict)
+                                else:
+                                	inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
                             # If any groups defined in "group_by" section, but host is not part of that group, it will go to catch-all group.
                             else:
                                 self._put_host_to_ungrouped(inventory_dict, server_name)
@@ -349,15 +354,15 @@ class NetboxAsInventory(object):
         """
 
         inventory_dict = dict()
-        netbox_hosts_list = self.get_hosts_list(self.api_url, self.api_token, self.host)
-
-        if netbox_hosts_list:
-            inventory_dict.update({"_meta": {"hostvars": {}}})
-            for current_host in netbox_hosts_list:
-                server_name = current_host.get("name")
-                self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                host_vars = self.get_host_vars(current_host, self.hosts_vars)
-                inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+        inventory_dict.update({"_meta": {"hostvars": {}}})
+	for path in self.api_paths:
+        	netbox_hosts_list = self.get_hosts_list(self.api_base_url + path, self.api_token, self.host)
+	        if netbox_hosts_list:
+            		for current_host in netbox_hosts_list:
+                		server_name = current_host.get("name")
+                		self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
+                		host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                		inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
 
     def print_inventory_json(self, inventory_dict):
