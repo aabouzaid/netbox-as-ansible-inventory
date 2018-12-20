@@ -257,10 +257,10 @@ class NetboxAsInventory(object):
 
                             if group_value:
                                 if isinstance(group_value, list):
-                                	for list_group in group_value:
-                                		inventory_dict = self.add_host_to_group(server_name, list_group, inventory_dict)
+                                    for list_group in group_value:
+                                        inventory_dict = self.add_host_to_group(server_name, list_group, inventory_dict)
                                 else:
-                                	inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
+                                    inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
                             # If any groups defined in "group_by" section, but host is not part of that group, it will go to catch-all group.
                             else:
                                 self._put_host_to_ungrouped(inventory_dict, server_name)
@@ -355,14 +355,14 @@ class NetboxAsInventory(object):
 
         inventory_dict = dict()
         inventory_dict.update({"_meta": {"hostvars": {}}})
-	for path in self.api_paths:
-        	netbox_hosts_list = self.get_hosts_list(self.api_base_url + path, self.api_token, self.host)
-	        if netbox_hosts_list:
-            		for current_host in netbox_hosts_list:
-                		server_name = current_host.get("name")
-                		self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                		host_vars = self.get_host_vars(current_host, self.hosts_vars)
-                		inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
+        for path in self.api_paths:
+            netbox_hosts_list = self.get_hosts_list(self.api_base_url + path, self.api_token, self.host)
+            if netbox_hosts_list:
+                    for current_host in netbox_hosts_list:
+                        server_name = current_host.get("name")
+                        self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
+                        host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                        inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
 
     def print_inventory_json(self, inventory_dict):
