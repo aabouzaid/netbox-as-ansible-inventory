@@ -18,6 +18,7 @@ try:
 except ImportError:
     import simplejson as json
 
+
 # Script.
 def cli_arguments():
     """Script cli arguments.
@@ -147,6 +148,7 @@ class NetboxAsInventory(object):
         config = self.script_config.setdefault("netbox", {})
         key_value = self._get_value_by_path(config, key_path, ignore_key_error=optional,
                                             default=default, error_message=error_message)
+
         return key_value
 
     @staticmethod
