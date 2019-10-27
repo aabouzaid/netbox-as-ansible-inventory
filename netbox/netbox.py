@@ -18,7 +18,6 @@ try:
 except ImportError:
     import simplejson as json
 
-
 # Script.
 def cli_arguments():
     """Script cli arguments.
@@ -148,7 +147,6 @@ class NetboxAsInventory(object):
         config = self.script_config.setdefault("netbox", {})
         key_value = self._get_value_by_path(config, key_path, ignore_key_error=optional,
                                             default=default, error_message=error_message)
-
         return key_value
 
     @staticmethod
@@ -308,7 +306,13 @@ class NetboxAsInventory(object):
                 for var_name, var_data in host_vars[category].items():
                     # This is because "custom_fields" has more than 1 type.
                     # Values inside "custom_fields" could be a key:value or a dict.
-                    if isinstance(data_dict.get(var_data), dict):
+                    if var_data == "config_context":
+                        var_value = data_dict.get(var_data)
+                        if var_value and var_value.get('configuration'):
+                            var_value = var_value['configuration']
+                        else:
+                            var_value = None
+                    elif isinstance(data_dict.get(var_data), dict):
                         var_value = self._get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
                     else:
                         var_value = data_dict.get(var_data)
