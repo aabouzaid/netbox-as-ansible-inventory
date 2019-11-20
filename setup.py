@@ -23,6 +23,7 @@ def open_file(file_name, splitlines=False):
 
     return file_output
 
+
 # Get vars from project files.
 version = open_file('VERSION')
 long_description = open_file('README.rst')
@@ -92,12 +93,14 @@ class Requirements(Command):
         pass
 
     def run(self):
-        import pip
-
         # Install requirements via pip.
-        pip.main(['install', '.'])
+        cmd = ['pip', 'install', '-r', 'requirements.txt']
+
         if self.tests_requirement:
-            pip.main(['install', '.[tests]'])
+            cmd += ['-r', 'tests/requirements.txt']
+
+        print(' '.join(cmd))
+        subprocess.check_call(cmd)
 
 setup(
     name='ansible-netbox-inventory',
