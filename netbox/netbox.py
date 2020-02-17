@@ -81,7 +81,7 @@ class NetboxAsInventory(object):
         self.api_url = self._config(["main", "api_url"])
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
         self.group_by = self._config(["group_by"], default={})
-        self.hosts_vars = self._config(["hosts_vars"], default={})
+        self.host_vars = self._config(["hosts_vars"], default={})
 
     def _get_value_by_path(self, source_dict, key_path,
                            ignore_key_error=False, default="", error_message=""):
@@ -278,32 +278,21 @@ class NetboxAsInventory(object):
 
         host_vars_dict = dict()
         if host_vars:
-            categories_source = {
-                "ip": host_data,
-                "general": host_data,
-                "custom": host_data.get("custom_fields")
-            }
-
             # Get host vars based on selected vars. (that should come from
             # script's config file)
-            for category in host_vars:
-                key_name = self.key_map[category]
-                data_dict = categories_source[category]
+            for host_var in self.host_vars:
+                var_name = host_var.get("inventory_var_name")
+                var_value = self._get_value_by_path(host_data,
+                                                    host_var['netbox_field']['path'],
+                                                    ignore_key_error=True)
 
-                for var_name, var_data in host_vars[category].items():
-                    # This is because "custom_fields" has more than 1 type.
-                    # Values inside "custom_fields" could be a key:value or a dict.
-                    if isinstance(data_dict.get(var_data), dict):
-                        var_value = self._get_value_by_path(data_dict, [var_data, key_name], ignore_key_error=True)
-                    else:
-                        var_value = data_dict.get(var_data)
-
-                    if var_value is not None:
-                        # Remove CIDR from IP address.
-                        if "ip" in host_vars and var_data in host_vars["ip"].values():
-                            var_value = var_value.split("/")[0]
-                        # Add var to host dict.
-                        host_vars_dict.update({var_name: var_value})
+                is_address = host_var.get("is_address")
+                if var_value is not None:
+                    # Remove CIDR from IP address.
+                    if is_address:
+                        var_value = var_value.split("/")[0]
+                    # Add var to host dict.
+                    host_vars_dict.update({var_name: var_value})
         return host_vars_dict
 
     def update_host_meta_vars(self, inventory_dict, host_name, host_vars):
@@ -341,7 +330,7 @@ class NetboxAsInventory(object):
             for current_host in netbox_hosts_list:
                 server_name = current_host.get("name")
                 self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
-                host_vars = self.get_host_vars(current_host, self.hosts_vars)
+                host_vars = self.get_host_vars(current_host, self.host_vars)
                 inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
 

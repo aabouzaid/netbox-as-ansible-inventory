@@ -18,14 +18,11 @@ netbox:
                 - path:
                     - platform
 
-    # Use Netbox sections as host variables.
+    # Use Netbox fields as host variables.
+    # Path ordering matters
     hosts_vars:
-        # Sections related to IPs e.g. "primary_ip" or "primary_ip4".
-        ip:
-            ansible_ssh_host: primary_ip
-        # Any other sections.
-        general:
-            rack_name: rack
-        # Custom sections (custom_fields) could be used as vars too.
-        #custom:
-        #    env: env
+        - inventory_var_name: ansible_ssh_host
+          netbox_field:
+              path:
+                - primary_ip
+          is_address: yes
