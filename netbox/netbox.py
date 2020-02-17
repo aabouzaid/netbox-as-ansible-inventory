@@ -82,6 +82,7 @@ class NetboxAsInventory(object):
         self.api_token = self._config(["main", "api_token"], default="", optional=True)
         self.group_by = self._config(["group_by"], default={})
         self.host_vars = self._config(["hosts_vars"], default={})
+        self.inv_host_key_fields = self._config(["host_key"], default=['name'])
 
     def _get_value_by_path(self, source_dict, key_path,
                            ignore_key_error=False, default="", error_message=""):
@@ -210,7 +211,8 @@ class NetboxAsInventory(object):
                 inventory_dict[group_value].append(server_name)
         return inventory_dict
 
-    def add_host_to_inventory(self, grouping_schema, inventory_dict, host_data):
+    def add_host_to_inventory(self, grouping_schema, server_name,
+                              inventory_dict, host_data):
         """Add a host to its groups.
 
         It checks if host in the groups and adds the host to these groups.
@@ -225,8 +227,6 @@ class NetboxAsInventory(object):
         Returns:
             The dict "inventory_dict" after adding the host to it.
         """
-
-        server_name = host_data.get("name")
 
         sentinel = "na"
 
@@ -315,6 +315,22 @@ class NetboxAsInventory(object):
             inventory_dict.update({host_name: host_vars})
         return inventory_dict
 
+    def _generate_inventory_host_key(self, netbox_host_context):
+        """Generate Ansible dynamic inventory host name from netbox
+           Netbox fields.
+
+           Returns:
+            String of netbox fields elected for invetory index.
+        """
+        seperator = "_"
+        eventual_host_name = []
+        for netbox_field in self.inv_host_key_fields:
+            field_value = netbox_host_context.get(netbox_field)
+            if field_value:
+                eventual_host_name.append(field_value)
+
+        return seperator.join(eventual_host_name)
+
     def generate_inventory(self):
         """Generate Ansible dynamic inventory.
 
@@ -324,12 +340,12 @@ class NetboxAsInventory(object):
 
         inventory_dict = dict()
         netbox_hosts_list = self.get_hosts_list(self.api_url, self.api_token, self.host)
-
         if netbox_hosts_list:
             inventory_dict.update({"_meta": {"hostvars": {}}})
             for current_host in netbox_hosts_list:
-                server_name = current_host.get("name")
-                self.add_host_to_inventory(self.group_by, inventory_dict, current_host)
+                server_name = self._generate_inventory_host_key(current_host)
+                self.add_host_to_inventory(self.group_by, server_name,
+                                           inventory_dict, current_host)
                 host_vars = self.get_host_vars(current_host, self.host_vars)
                 inventory_dict = self.update_host_meta_vars(inventory_dict, server_name, host_vars)
         return inventory_dict
