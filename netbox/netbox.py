@@ -83,14 +83,6 @@ class NetboxAsInventory(object):
         self.group_by = self._config(["group_by"], default={})
         self.hosts_vars = self._config(["hosts_vars"], default={})
 
-        # Get value based on key.
-        self.key_map = {
-            "default": "name",
-            "general": "name",
-            "custom": "value",
-            "ip": "address"
-        }
-
     def _get_value_by_path(self, source_dict, key_path,
                            ignore_key_error=False, default="", error_message=""):
         """Get key value from nested dict by path.
@@ -218,15 +210,15 @@ class NetboxAsInventory(object):
                 inventory_dict[group_value].append(server_name)
         return inventory_dict
 
-    def add_host_to_inventory(self, groups_categories, inventory_dict, host_data):
+    def add_host_to_inventory(self, grouping_schema, inventory_dict, host_data):
         """Add a host to its groups.
 
         It checks if host in the groups and adds the host to these groups.
         The groups are defined in this inventory script config file.
 
         Args:
-            groups_categories: Dict, it has a categories of groups that will be
-                used as Ansible inventory groups.
+            grouping_schema: Dict, holds all groupings details
+            for forming Ansible inventory groups.
             inventory_dict: Dict, which is Ansible inventory.
             host_data: Dict, it has the host data that will be added to inventory.
 
@@ -235,35 +227,28 @@ class NetboxAsInventory(object):
         """
 
         server_name = host_data.get("name")
-        categories_source = {
-            "default": host_data,
-            "custom": host_data.get("custom_fields")
-        }
 
-        if groups_categories:
-            # There are 2 categories that will be used to group hosts.
-            # One for default section in netbox, and another for "custom_fields" which are being defined by netbox user.
-            for category in groups_categories:
-                key_name = self.key_map[category]
-                data_dict = categories_source[category]
+        sentinel = "na"
 
-                if groups_categories[category]:
-                    # The groups that will be used to group hosts in the inventory.
-                    for group in groups_categories[category]:
-                        # Try to get group value. If the section not found in netbox, this also will print error message.
-                        if data_dict:
-                            group_value = self._get_value_by_path(data_dict, [group, key_name])
+        if grouping_schema:
+            for grouping in [g['grouping'] for g in grouping_schema]:
+                # Try to assemble group from groupings.
+                # If the grouping path not found in netbox, this also will print error message.
+                seperator = grouping.get("seperator", "_")
+                group_name = []
+                for nb_field in grouping.get("netbox_fields"):
+                    group_part = self._get_value_by_path(host_data,
+                                                         nb_field.get("path"),
+                                                         default=sentinel)
+                    if not group_part:
+                        # empty netbox value
+                        group_part = sentinel
+                    group_name.append(group_part)
 
-                            if group_value:
-                                inventory_dict = self.add_host_to_group(server_name, group_value, inventory_dict)
-                            # If any groups defined in "group_by" section, but host is not part of that group, it will go to catch-all group.
-                            else:
-                                self._put_host_to_ungrouped(inventory_dict, server_name)
-                # If any category defined but no groups in "group_by" section, the host will go to catch-all group.
-                else:
-                    self._put_host_to_ungrouped(inventory_dict, server_name)
-        # If no groups and no category in "group_by" section, the host will go to catch-all group.
+                group_name = seperator.join(group_name)
+                self.add_host_to_group(server_name, group_name, inventory_dict)
         else:
+        # If no groupings specified, the host will go to catch-all group.
             self._put_host_to_ungrouped(inventory_dict, server_name)
 
         return inventory_dict

@@ -3,17 +3,20 @@ netbox:
         api_url: 'http://localhost/api/dcim/devices/'
         #api_token: ''
 
-    # How servers will be grouped.
-    # If no group specified here, inventory script will return all servers.
+    # If no grouping specified here, inventory script will return all servers.
+    # Path ordering matters
     group_by:
-        # Default section in Netbox.
-        default:
-            - device_role
-            - rack
-            - platform
-        # Custom sections (custom_fields) could be used.
-        #custom:
-        #    - env
+        - grouping:
+            netbox_fields:
+                - path:
+                    - device_role
+                - path:
+                    - rack
+            seperator: "_"
+        - grouping:
+            netbox_fields:
+                - path:
+                    - platform
 
     # Use Netbox sections as host variables.
     hosts_vars:
