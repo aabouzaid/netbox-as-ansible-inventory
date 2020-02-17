@@ -3,6 +3,11 @@ netbox:
         api_url: 'http://localhost/api/dcim/devices/'
         #api_token: ''
 
+
+    # Determing the key/index of the inventory entry.
+    # In ansible terms that's the inventory_host_name.
+    host_key:
+        - name
     # How servers will be grouped.
     # If no group specified here, inventory script will return all servers.
     group_by:
