@@ -3,6 +3,9 @@ Netbox dynamic inventory script
 
 |PyPI Version| |Python Version| |Build Status| |Codacy Badge| |Code Health| |Coverage Status|
 
+
+**Please note:** This project is not under active development anymore, please use `NetBox community Ansible modules <https://github.com/netbox-community/ansible_modules>`__.
+
 ToC
 ---
 
