@@ -1,6 +1,10 @@
 netbox:
     main:
-        api_url: 'http://localhost/api/dcim/devices/'
+        api_base_url: 'http://localhost/api/'
+        api_token: 'abcdefghijklmnopqrstuvwxyz1234567890'
+        api_paths:
+          - 'virtualization/virtual-machines/'
+          - 'dcim/devices/'
         #api_token: ''
 
     # How servers will be grouped.
