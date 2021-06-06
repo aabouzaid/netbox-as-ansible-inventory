@@ -23,6 +23,7 @@ netbox:
         # Any other sections.
         general:
             rack_name: rack
+            config: config_context
         # Custom sections (custom_fields) could be used as vars too.
         #custom:
         #    env: env
